@@ -1,8 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
+#ifndef STRUCTURES_H_INCLUDED
+#define STRUCTURES_H_INCLUDED
+
 
 /* dimension du monde en nombre de cases */
-#define LONG 12
+#define HAUT 12
 #define LARG 18
 
 #define ROUGE ’R’ //identifiant du premier joueur
@@ -24,14 +25,10 @@ typedef struct unite{
 typedef Unite* UListe;
 
 typedef struct monde{
-	Unite *plateau[LONG][LARG];
+	Unite *plateau[HAUT][LARG];
 	int tour; /* Numero du tour */
 	UListe rouge, bleu; /*Listes des deux joueurs*/
 } Monde;
 
 
-
-int main () {
-
-	return 0;
-}
+#endif /* STRUCTURES_H_INCLUDED */
