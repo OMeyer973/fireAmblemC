@@ -42,6 +42,10 @@ int initMonde (Monde* monde) {
 	monde->stats.arc.vie 		= 5;
 	monde->stats.arc.force 		= 3;
 
+	Unite uniteTmp;
+	uniteTmp.suiv = 0;
+	monde->rouge.unites = &uniteTmp;
+	monde->bleu.unites = &uniteTmp;
 	return 1;
 }
 
@@ -69,8 +73,8 @@ int afficheMonde (Monde monde) {
 }
 
 Unite* creeUnite(char couleur, char arme, int x, int y, int vie) {
-	/*insere une unité dans une armée,
-	défini son arme et ses coordonnées
+	/*créé une unité,
+	défini son arme ses coordonnées
 	et retourne l'adresse de l'unite
 	On ne fait pas de vérification sur les paramètres*/
 	Unite* tmp;
@@ -90,9 +94,50 @@ Unite* creeUnite(char couleur, char arme, int x, int y, int vie) {
 	return tmp;
 }
 
-int insereUnite(Unite** unites, Unite* unite) {
-	/*insere une unité dans une armée*/
-	unite->suiv = *unites;
-	*unites = unite;
+int insereUnite(InfoJoueur* joueur, Unite* unite) {
+	/*insere une unité dans une armée 
+	et incrémente le nombre d'unités du joueur*/
+	unite->suiv = joueur->unites;
+	joueur->unites = unite;
+	
+	joueur->nbUnites ++;
 	return 1;
+}
+
+int supprimeUnite(Monde* monde, int x, int y) {
+	/*suprime de la liste unites 
+	l'unite se trouvant sur la plateau aux coordonées  x y*/
+	/*
+	/!!!\penser à bien vérifier que le dernier élément 
+	des listes d'unités des joueurs pointe vers un 0 
+	sinon segfault/!!!\
+	*/
+
+	/*check si l'unité est au joueur rouge et la supprime*/
+	Unite* unitesTmp = monde->rouge.unites;
+	while (unitesTmp->suiv != 0){
+
+		if (unitesTmp->posX == x && unitesTmp->posY == y) {
+		
+			unitesTmp->suiv = unitesTmp->suiv->suiv;
+			monde->plateau[x][y] = NULL;
+			return 1;
+		}
+		unitesTmp = unitesTmp->suiv;
+	}
+
+	/*check si l'unité est au joueur bleu et la supprime*/
+	unitesTmp = monde->bleu.unites;
+	while (unitesTmp->suiv != 0){
+
+		if (unitesTmp->posX == x && unitesTmp->posY == y) {
+		
+			unitesTmp->suiv = unitesTmp->suiv->suiv;
+			monde->plateau[x][y] = NULL;
+			return 1;
+		}
+		unitesTmp = unitesTmp->suiv;
+	}
+	return 0;
+
 }

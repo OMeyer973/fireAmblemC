@@ -12,10 +12,11 @@ int main () {
 	Unite* uniteTmp;
 	for (i=0; i<monde.stats.hache.nombre; i++) {
 		uniteTmp = creeUnite('R','H',4,i, monde.stats.hache.vie);
-		insereUnite(&monde.rouge.unites, uniteTmp);
+		insereUnite(&monde.rouge, uniteTmp);
 		monde.plateau[4][i] = uniteTmp;
-		monde.plateau[4][0] = NULL;
 	}
+
+	supprimeUnite(&monde,5,0);
 	afficheMonde(monde);
 	return 0;
 }

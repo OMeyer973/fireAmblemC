@@ -46,8 +46,6 @@ typedef struct monde{ /*contient toutes les infos relatives à la partie en cour
 	Unite* plateau[HAUT][LARG];
 	int tour; /* Numero du tour */
 	Stats stats; /*statistiques concernant les types d'unités du jeu*/
-	int nbRouges; /*nombre d'unités rouges sur le plateau*/
-	int nbBleus; /*nombre d'unités bleues sur le plateau*/
 	InfoJoueur rouge, bleu; /*Listes des unités des deux joueurs*/
 } Monde;
 
