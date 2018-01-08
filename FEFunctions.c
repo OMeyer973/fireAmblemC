@@ -68,11 +68,43 @@ int afficheMonde (Monde monde) {
 	return 1;
 }
 
+Unite* creeUnite(char couleur, char arme, int x, int y, int vie) {
+	/*insere une unité dans une armée,
+	défini son arme et ses coordonnées
+	et retourne l'adresse de l'unite
+	On ne fait pas de vérification sur les paramètres*/
+
+	Unite* tmp;
+	
+	tmp = malloc(sizeof(Unite));
+	if (tmp==NULL){
+        printf("l'allocation n'a pas fonctionné");
+    	return 0;
+	}
+    
+    tmp->arme = arme;
+    tmp->couleur = couleur;
+    tmp->posX = x;
+    tmp->posY = y;
+
+	return tmp;
+}
+
+int insereUnite(Unite** unites, Unite* unite) {
+	/*insere une unité dans une armée*/
+
+	unite->suiv = *unites;
+	*unites = unite;
+	return 1;
+}
+
+/*
 Unite* insereUnite(Unite** unites, char couleur, char arme, int x, int y) {
 	/*insere une unité dans une armée,
 	défini son arme et ses coordonnées
 	et retourne l'adresse de l'unite
 	On ne fait pas de vérification sur les paramètres*/
+/*
 	Unite* tmp;
 	
 	tmp = malloc(sizeof(Unite));
@@ -91,3 +123,4 @@ Unite* insereUnite(Unite** unites, char couleur, char arme, int x, int y) {
 	*unites = tmp;
 	return tmp;
 }
+*/

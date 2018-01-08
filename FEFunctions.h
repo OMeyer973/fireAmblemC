@@ -3,4 +3,5 @@
 
 int initMonde (Monde* monde);
 int afficheMonde (Monde monde);
-Unite* insereUnite(Unite** unites, char couleur, char arme, int x, int y);
+Unite* creeUnite(char couleur, char arme, int x, int y, int vie);
+int insereUnite(Unite** unites, Unite* unite);
