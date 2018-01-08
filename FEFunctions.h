@@ -1,3 +1,6 @@
 #include "FEStructures.h"
 
-int afficheMonde (Monde md);
+
+int initMonde (Monde* monde);
+int afficheMonde (Monde monde);
+int insereUnite(Unite** unites, char arme, int x, int y);
