@@ -14,8 +14,7 @@
 #define EPEE ’E’
 #define ARC ’A’
 
-/*structure contenant les statistiques d'une unitée donnée*/
-typedef struct ustat{
+typedef struct ustat{ /*structure contenant les statistiques d'une unitée donnée*/
 	int nombre; /*nombre d'unités de ce type dans les armées*/
 	int endurance; /*endurance de l'unité (nb de cases qu'elle peut parcourir en 1 tour)*/
 	int portee; /*distance à laquelle l'unité peut attaquer*/
@@ -23,15 +22,14 @@ typedef struct ustat{
 	int force; /*dommages que l'unité inflige en attaquant*/
 } Ustat;
 
-/*structure contenant les statistiques de tous les types d'unités*/
-typedef struct stats{
+typedef struct stats{/*structure contenant les statistiques de tous les types d'unités*/
 	Ustat hache;
 	Ustat lance;
 	Ustat epee;
 	Ustat arc;
 } Stats;
 
-typedef struct unite{
+typedef struct unite{ /*infos sur une unité dans l’armée d’un joueur*/
 	char couleur; /*R ou B pour ROUGE ou BLEU*/
 	char arme; /*H L E ou A pour hache, lance, épée, arc*/
 	struct unite *suiv; /*liste des unités suivantes*/
@@ -39,12 +37,12 @@ typedef struct unite{
 	int vie; /*nombre de points de vie de l'unité*/
 } Unite;
 
-typedef struct infoJoueur {
-	int nbUnites;
-	Unite* unites;
+typedef struct infoJoueur { /*donne des infos sur l’armée du joueur*/
+	int nbUnites; /*nombre d'unités du joueur*/
+	Unite* unites; /*liste des unités du joueur*/
 }InfoJoueur;
 
-typedef struct monde{
+typedef struct monde{ /*contient toutes les infos relatives à la partie en cours*/
 	Unite* plateau[HAUT][LARG];
 	int tour; /* Numero du tour */
 	Stats stats; /*statistiques concernant les types d'unités du jeu*/

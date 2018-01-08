@@ -14,6 +14,7 @@ int main () {
 		uniteTmp = creeUnite('R','H',4,i, monde.stats.hache.vie);
 		insereUnite(&monde.rouge.unites, uniteTmp);
 		monde.plateau[4][i] = uniteTmp;
+		monde.plateau[4][0] = NULL;
 	}
 	afficheMonde(monde);
 	return 0;

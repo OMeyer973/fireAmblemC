@@ -58,8 +58,8 @@ int afficheMonde (Monde monde) {
 			else {
 				printf("%c",monde.plateau[x][y]->couleur);
 				printf("%c",monde.plateau[x][y]->arme);
-				printf("%c",monde.plateau[x][y]->arme);
-				printf("%c",monde.plateau[x][y]->arme);
+				printf("%d",monde.plateau[x][y]->vie);
+				printf(" ");
 			}
 		}
 		printf("|\n");
@@ -73,7 +73,6 @@ Unite* creeUnite(char couleur, char arme, int x, int y, int vie) {
 	défini son arme et ses coordonnées
 	et retourne l'adresse de l'unite
 	On ne fait pas de vérification sur les paramètres*/
-
 	Unite* tmp;
 	
 	tmp = malloc(sizeof(Unite));
@@ -86,41 +85,14 @@ Unite* creeUnite(char couleur, char arme, int x, int y, int vie) {
     tmp->couleur = couleur;
     tmp->posX = x;
     tmp->posY = y;
+    tmp->vie = vie;
 
 	return tmp;
 }
 
 int insereUnite(Unite** unites, Unite* unite) {
 	/*insere une unité dans une armée*/
-
 	unite->suiv = *unites;
 	*unites = unite;
 	return 1;
 }
-
-/*
-Unite* insereUnite(Unite** unites, char couleur, char arme, int x, int y) {
-	/*insere une unité dans une armée,
-	défini son arme et ses coordonnées
-	et retourne l'adresse de l'unite
-	On ne fait pas de vérification sur les paramètres*/
-/*
-	Unite* tmp;
-	
-	tmp = malloc(sizeof(Unite));
-	if (tmp==NULL){
-        printf("l'allocation n'a pas fonctionné");
-    	return 0;
-	}
-    
-    tmp->arme = arme;
-    tmp->couleur = couleur;
-    tmp->posX = x;
-    tmp->posY = y;
-
-
-	tmp->suiv = *unites;
-	*unites = tmp;
-	return tmp;
-}
-*/
