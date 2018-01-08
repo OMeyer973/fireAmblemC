@@ -56,7 +56,10 @@ int afficheMonde (Monde monde) {
 				printf("    ");	
 			}
 			else {
-				printf("XXXX");
+				printf("%c",monde.plateau[x][y]->couleur);
+				printf("%c",monde.plateau[x][y]->arme);
+				printf("%c",monde.plateau[x][y]->arme);
+				printf("%c",monde.plateau[x][y]->arme);
 			}
 		}
 		printf("|\n");
@@ -65,8 +68,10 @@ int afficheMonde (Monde monde) {
 	return 1;
 }
 
-int insereUnite(Unite** unites, char arme, int x, int y) {
-	/*insere une unité dans une armée et défini son arme et ses coordonnées
+Unite* insereUnite(Unite** unites, char couleur, char arme, int x, int y) {
+	/*insere une unité dans une armée,
+	défini son arme et ses coordonnées
+	et retourne l'adresse de l'unite
 	On ne fait pas de vérification sur les paramètres*/
 	Unite* tmp;
 	
@@ -77,11 +82,12 @@ int insereUnite(Unite** unites, char arme, int x, int y) {
 	}
     
     tmp->arme = arme;
+    tmp->couleur = couleur;
     tmp->posX = x;
     tmp->posY = y;
 
 
 	tmp->suiv = *unites;
 	*unites = tmp;
-	return 1;
+	return tmp;
 }

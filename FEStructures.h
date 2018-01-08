@@ -32,10 +32,11 @@ typedef struct stats{
 } Stats;
 
 typedef struct unite{
-	int posX, posY; /*pour stocker les coordonnées de l’unité*/
 	char couleur; /*R ou B pour ROUGE ou BLEU*/
 	char arme; /*H L E ou A pour hache, lance, épée, arc*/
 	struct unite *suiv; /*liste des unités suivantes*/
+	int posX, posY; /*pour stocker les coordonnées de l’unité*/
+	int vie; /*nombre de points de vie de l'unité*/
 } Unite;
 
 typedef struct infoJoueur {
