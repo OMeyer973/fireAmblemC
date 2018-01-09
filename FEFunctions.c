@@ -179,16 +179,9 @@ Unite* trouveUnite(Monde monde, int x, int y) {
 	return monde.plateau[x][y];
 }
 
-int souleveUnite (Monde* monde, Unite unite) {
-	/*soulève une unité du plateau (mais ne la suprimme pas de l'armée !)*/
-	monde->plateau[unite.posX][unite.posY] = NULL;
-	return 1;
-}
-
-int poseUnite (Monde* monde, Unite* unite, int x, int y) {
-	/*pose une unité sur le plateau à une nouvelle position
-	(l'unité doit avoir été au préalable soulevée, 
-	sinon elle sera présente en double sur le plateau*/
+int deplaceUnite (Monde* monde, Unite* unite, int x, int y) {
+	/*déplace une unité vers une nouvelle position sur le plateau*/
+	monde->plateau[unite->posX][unite->posY] = NULL;
 	unite->posX = x;
 	unite->posY = y;
 	monde->plateau[x][y] = unite;

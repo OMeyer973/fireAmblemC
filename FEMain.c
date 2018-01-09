@@ -21,8 +21,7 @@ int main () {
 	afficheMonde(monde);
 
 	uniteTmp = trouveUnite(monde,4,1);
-	souleveUnite(&monde,*uniteTmp);
-	poseUnite(&monde,uniteTmp,5,1);
+	deplaceUnite(&monde,uniteTmp,5,1);
 
 	afficheMonde(monde);
 	return 0;
