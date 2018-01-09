@@ -15,8 +15,15 @@ int main () {
 		insereUnite(&monde.rouge, uniteTmp);
 		monde.plateau[4][i] = uniteTmp;
 	}
+	afficheMonde(monde);
 
-	supprimeUnite(&monde,5,0);
+	supprimeUnite(&monde,4,2);
+	afficheMonde(monde);
+
+	uniteTmp = trouveUnite(monde,4,1);
+	souleveUnite(&monde,*uniteTmp);
+	poseUnite(&monde,uniteTmp,5,1);
+
 	afficheMonde(monde);
 	return 0;
 }

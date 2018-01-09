@@ -49,11 +49,35 @@ int initMonde (Monde* monde) {
 	return 1;
 }
 
+int afficheDeuxChiffres (int x) {
+	/*affiche x écrit avec 2 chiffres (on suppose x < 100)*/
+	if (x<10) {
+		printf("0%d",x);
+	} else {
+		printf("%d",x);
+	}
+	return 1;
+}
+
+
 int afficheMonde (Monde monde) {
 	int x = 0;
 	int y = 0;
+	
+	/*affiche numéro des colones*/
+	printf("\n  y");
+	for (y=0; y< LARG; y++) {
+		printf(" ");
+		afficheDeuxChiffres(y);
+		printf("  ");
+	}
+	printf("\n");
+
+	printf("x -------------------------------------------------------------------------------------------\n");
+	
 	for (x=0; x<HAUT; x++) {
-		printf("-------------------------------------------------------------------------------------------\n");
+		afficheDeuxChiffres(x);
+
 		for (y=0; y< LARG; y++) {
 			printf("|");
 			if (monde.plateau[x][y] == NULL) {
@@ -67,8 +91,9 @@ int afficheMonde (Monde monde) {
 			}
 		}
 		printf("|\n");
+		printf("  -------------------------------------------------------------------------------------------\n");
+		
 	}
-	printf("-------------------------------------------------------------------------------------------\n");
 	return 1;
 }
 
@@ -105,33 +130,41 @@ int insereUnite(InfoJoueur* joueur, Unite* unite) {
 }
 
 int supprimeUnite(Monde* monde, int x, int y) {
-	/*suprime de la liste unites 
-	l'unite se trouvant sur la plateau aux coordonées  x y*/
 	/*
-	/!!!\penser à bien vérifier que le dernier élément 
+	suprime de la liste unites 
+	l'unite se trouvant sur la plateau aux coordonées  x y
+	ne vérifie pas les paramètres
+	*/
+	/*
+	/!!!\
+	- penser à bien vérifier que le dernier élément 
 	des listes d'unités des joueurs pointe vers un 0 
-	sinon segfault/!!!\
+	sinon segfault
+	- ne pas exécuter sur une case vide sinon segfault
+	/!!!\
 	*/
 
-	/*check si l'unité est au joueur rouge et la supprime*/
-	Unite* unitesTmp = monde->rouge.unites;
-	while (unitesTmp->suiv != 0){
+	Unite* unitesTmp;
 
-		if (unitesTmp->posX == x && unitesTmp->posY == y) {
-		
-			unitesTmp->suiv = unitesTmp->suiv->suiv;
-			monde->plateau[x][y] = NULL;
-			return 1;
-		}
-		unitesTmp = unitesTmp->suiv;
+	if  (monde->plateau[x][y]->couleur =='R') {
+		/*check si l'unité est au joueur rouge*/
+		unitesTmp = monde->rouge.unites;
+
+		/*monde->rouge.nbUnites --;*/
+	} 
+	else if (monde->plateau[x][y]->couleur =='B') {
+		/*check si l'unité est au joueur bleu*/
+		unitesTmp = monde->bleu.unites;
+
+		monde->bleu.nbUnites --;
 	}
 
-	/*check si l'unité est au joueur bleu et la supprime*/
-	unitesTmp = monde->bleu.unites;
+	/*retire l'unité de la liste*/
 	while (unitesTmp->suiv != 0){
-
 		if (unitesTmp->posX == x && unitesTmp->posY == y) {
-		
+			
+			free(unitesTmp);
+			
 			unitesTmp->suiv = unitesTmp->suiv->suiv;
 			monde->plateau[x][y] = NULL;
 			return 1;
@@ -139,5 +172,25 @@ int supprimeUnite(Monde* monde, int x, int y) {
 		unitesTmp = unitesTmp->suiv;
 	}
 	return 0;
+}
 
+Unite* trouveUnite(Monde monde, int x, int y) {
+	/*retourne l'unité présente sur une case du tableau*/
+	return monde.plateau[x][y];
+}
+
+int souleveUnite (Monde* monde, Unite unite) {
+	/*soulève une unité du plateau (mais ne la suprimme pas de l'armée !)*/
+	monde->plateau[unite.posX][unite.posY] = NULL;
+	return 1;
+}
+
+int poseUnite (Monde* monde, Unite* unite, int x, int y) {
+	/*pose une unité sur le plateau à une nouvelle position
+	(l'unité doit avoir été au préalable soulevée, 
+	sinon elle sera présente en double sur le plateau*/
+	unite->posX = x;
+	unite->posY = y;
+	monde->plateau[x][y] = unite;
+	return 1;
 }
