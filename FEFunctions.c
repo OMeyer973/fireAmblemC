@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <math.h>
 
 #include "FEStructures.h"
 #include "FEFunctions.h"
@@ -14,6 +17,7 @@ int initMonde (Monde* monde) {
 	for (x=0; x<HAUT; x++) {
 		for (y=0; y< LARG; y++) {
 			monde->plateau[x][y] = NULL;
+			monde->accessible[x][y] = false;
 			}
 		}
 
@@ -49,6 +53,82 @@ int initMonde (Monde* monde) {
 	return 1;
 }
 
+int secuScanInt() {
+	/*scan et renvoie un entier avec une sécurité en cas d'input non voulu*/
+	char line[256];
+	int tmp = -1;
+
+	while (true) {
+		tmp = -1;
+
+		if (fgets(line, sizeof(line), stdin)) {
+    		if (1 == sscanf(line, "%d", &tmp)) {
+        		/* input can be safely used */
+        		return tmp;
+     		}
+		}
+		printf("Erreur : veuillez entrer un int : ");
+  	}
+}
+
+int lireCommande(int* x, int* y) {
+	/*lit une paire de coordonées x et y 
+	sur le plateau de manière sécurisée*/
+	bool xValide = false;
+	bool yValide = false;
+	int tmp = -1;
+
+	while (!xValide) {
+		tmp = -1;
+		printf("x : ");
+		tmp = secuScanInt();
+    	if (tmp >= 0 && tmp < HAUT) {
+	  			*x = tmp;
+	  			xValide = true;
+	  		} else {
+	  		printf("Erreur : entrez une valeur entre 0 et %d pour ", (HAUT-1));
+	  	}
+  	}
+
+  	while (!yValide) {
+		tmp = -1;
+		printf("y : ");
+		tmp = secuScanInt();
+    	if (tmp >= 0 && tmp < HAUT) {
+	  			*y = tmp;
+	  			yValide = true;
+	  		} else {
+	  		printf("Erreur : entrez une valeur entre 0 et %d pour ", (LARG-1));
+	  	}
+  	}
+  	return 1;
+}
+
+int dist(int a, int b, int c, int d) {
+	/*donne la distance du point de coordonées a,b
+	au point de coordonées c,d*/
+	return (abs(a - c) + abs(b - d));
+}
+
+int estAProximite(Monde* monde, int x, int y, int maxDist) {
+	/*remplie le tableau d'accessibilité du monde en fonction de 
+	la case de référence (x,y) et de la distance d'atteinte*/
+	int i = 0;
+	int j = 0;
+	for (i=0; i<HAUT; i++) {
+		for (j=0; j<LARG; j++) {
+			if (dist(x, y, i, j) <= maxDist) {
+				monde->accessible[i][j] = true;
+			} else {
+				monde->accessible[i][j] = false;
+			}
+		}
+	}
+	return 1;
+}
+
+
+
 int afficheDeuxChiffres (int x) {
 	/*affiche x écrit avec 2 chiffres (on suppose x < 100)*/
 	if (x<10) {
@@ -81,12 +161,17 @@ int afficheMonde (Monde monde) {
 		for (y=0; y< LARG; y++) {
 			printf("|");
 			if (monde.plateau[x][y] == NULL) {
-				printf("    ");	
+				printf("   ");	
 			}
 			else {
 				printf("%c",monde.plateau[x][y]->couleur);
 				printf("%c",monde.plateau[x][y]->arme);
 				printf("%d",monde.plateau[x][y]->vie);
+			}
+			
+			if (monde.accessible[x][y]) {
+					printf("x");
+			} else {
 				printf(" ");
 			}
 		}
@@ -129,7 +214,7 @@ int insereUnite(InfoJoueur* joueur, Unite* unite) {
 	return 1;
 }
 
-int supprimeUnite(Monde* monde, int x, int y) {
+int supprimeUniteDepuisMonde(Monde* monde, int x, int y) {
 	/*
 	suprime de la liste unites 
 	l'unite se trouvant sur la plateau aux coordonées  x y
@@ -146,13 +231,13 @@ int supprimeUnite(Monde* monde, int x, int y) {
 
 	Unite* unitesTmp;
 
-	if  (monde->plateau[x][y]->couleur =='R') {
+	if  (monde->plateau[x][y]->couleur == ROUGE) {
 		/*check si l'unité est au joueur rouge*/
 		unitesTmp = monde->rouge.unites;
 
 		/*monde->rouge.nbUnites --;*/
 	} 
-	else if (monde->plateau[x][y]->couleur =='B') {
+	else if (monde->plateau[x][y]->couleur == BLEU) {
 		/*check si l'unité est au joueur bleu*/
 		unitesTmp = monde->bleu.unites;
 
@@ -174,6 +259,32 @@ int supprimeUnite(Monde* monde, int x, int y) {
 	return 0;
 }
 
+int supprimeUnite(Monde* monde, Unite* unite) {
+	/*
+	suprime de la liste unites 
+	l'unite se trouvant sur la plateau aux coordonées  x y
+	ne vérifie pas les paramètres
+	*/
+	/*
+	/!!!\
+	- penser à bien vérifier que le dernier élément 
+	des listes d'unités des joueurs pointe vers un 0 
+	sinon segfault
+	- ne pas exécuter sur une case vide sinon segfault
+	/!!!\
+	*/
+
+	Unite* unitesTmp = unite;
+
+	/*retire l'unité de la liste*/
+			
+	free(unitesTmp);
+		
+	unitesTmp->suiv = unitesTmp->suiv->suiv;
+	monde->plateau[unite->posX][unite->posY] = NULL;
+	return 1;
+}
+
 Unite* trouveUnite(Monde monde, int x, int y) {
 	/*retourne l'unité présente sur une case du tableau*/
 	return monde.plateau[x][y];
@@ -185,5 +296,15 @@ int deplaceUnite (Monde* monde, Unite* unite, int x, int y) {
 	unite->posX = x;
 	unite->posY = y;
 	monde->plateau[x][y] = unite;
+	return 1;
+}
+
+int blesseUnite (Monde* monde, Unite* unite, int degat) {
+	/*blesse une unité d'un certain nombre de points de dégat
+	et la supprime si elle n'a plus de points de vie*/
+	unite->vie -= degat;
+	if (unite->vie <= 0) {
+		supprimeUnite(monde,unite);
+	}
 	return 1;
 }

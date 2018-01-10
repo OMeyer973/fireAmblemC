@@ -2,10 +2,15 @@
 
 
 int initMonde (Monde* monde);
+int secuScanInt();
+int lireCommande(int* x, int* y);
+int dist(int a, int b, int c, int d);
+int estAProximite(Monde* monde, int x, int y, int dist);
 int afficheDeuxChiffres (int x);
 int afficheMonde (Monde monde);
 Unite* creeUnite(char couleur, char arme, int x, int y, int vie);
 int insereUnite(InfoJoueur* joueur, Unite* unite);
-int supprimeUnite(Monde* monde, int x, int y);
+int supprimeUnite(Monde* monde, Unite* unite);
+int supprimeUniteDepuisMonde(Monde* monde, int x, int y);
 Unite* trouveUnite(Monde monde, int x, int y);
 int deplaceUnite (Monde* monde, Unite* unite, int x, int y);
