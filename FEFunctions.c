@@ -101,7 +101,7 @@ int lireCommande(int* x, int* y) {
 
 	while (!xValide) {
 		tmp = -1;
-		printf("  - x : ");
+		printf("   - x : ");
 		tmp = secuScanInt();
     	if (tmp >= 0 && tmp < HAUT) {
 	  			*x = tmp;
@@ -113,7 +113,7 @@ int lireCommande(int* x, int* y) {
 
   	while (!yValide) {
 		tmp = -1;
-		printf("  - y : ");
+		printf("   - y : ");
 		tmp = secuScanInt();
     	if (tmp >= 0 && tmp < LARG) {
 	  			*y = tmp;
@@ -131,7 +131,7 @@ int dist(int a, int b, int c, int d) {
 	return (abs(a - c) + abs(b - d));
 }
 
-int estAProximite(Monde* monde, int x, int y, int maxDist) {
+int creeAccessibilite(Monde* monde, int x, int y, int maxDist) {
 	/*remplie le tableau d'accessibilité du monde en fonction de 
 	la case de référence (x,y) et de la distance d'atteinte*/
 	int i = 0;
@@ -148,8 +148,8 @@ int estAProximite(Monde* monde, int x, int y, int maxDist) {
 	return 1;
 }
 
-int videAcessibilite(Monde* monde) {
-	/*vide le tableau d'acessibilité*/
+int videAccessibilite(Monde* monde) {
+	/*vide le tableau d'accessibilité*/
 	int i = 0;
 	int j = 0;
 	for (i=0; i<HAUT; i++) {
@@ -178,7 +178,7 @@ int afficheMonde (Monde monde, const char* armesChar) {
 	int y = 0;
 	
 	/*affiche numéro des colones*/
-	printf("\n  y");
+	printf("\n   y");
 	for (y=0; y< LARG; y++) {
 		printf(" ");
 		afficheDeuxChiffres(y);
@@ -186,9 +186,10 @@ int afficheMonde (Monde monde, const char* armesChar) {
 	}
 	printf("\n");
 
-	printf("x ┌────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┐\n");
+	printf(" x ┌────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┐\n");
 	
 	for (x=0; x<HAUT; x++) {
+		printf(" ");
 		afficheDeuxChiffres(x);
 
 		for (y=0; y< LARG; y++) {
@@ -222,9 +223,9 @@ int afficheMonde (Monde monde, const char* armesChar) {
 		}
 		printf("│\n");
 		if (x==HAUT-1) {
-			printf("  └────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┘\n");
+			printf("   └────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┘\n");
 		} else {
-			printf("  ├────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┤\n");
+			printf("   ├────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┤\n");
 		}
 		
 	}
@@ -408,28 +409,39 @@ int blesseUnite (Monde* monde, Unite* unite, int degat) {
 	et la supprime si elle n'a plus de points de vie*/
 	unite->vie -= degat;
 	if (unite->vie <= 0) {
-		supprimeUnite(monde,unite);
+			supprimeUnite(monde,unite);
 	}
 	return 1;
 }
 
 bool estLibre(Monde monde, int x, int y) {
+	/*renvoie vrai si la case x,y est libre*/
 	if (monde.plateau[x][y] == NULL) {
 		return true;
 	}
 	return false;
 }
 
+bool estAlliee(Unite* unite, char couleur) {
+	/*renvoie vrai si l'unite est de la couleur couleur*/
+	if (unite->couleur == couleur) {
+		return true;
+	}
+	return false;
+}
+
+
+
 
 int commentaireIntro() {
-	printf("  Bienvenue dans FELite. Avant de commencer la bataille, les %d joueurs doivent placer\n  leurs armées sur le champs de bataille.\n",NBCOULEURS);
-	printf("  Chaque joueur a à sa disposition une armée composée de 1 Haches, 1 Lances, 1 Epees et 1 Arcs.\n");
+	printf("   Bienvenue dans FELite. Avant de commencer la bataille, les %d joueurs doivent placer\n   leurs armées sur le champs de bataille.\n",NBCOULEURS);
+	printf("   Chaque joueur a à sa disposition une armée composée de 1 Haches, 1 Lances, 1 Epees et 1 Arcs.\n");
 
 	return 1;
 }
 
 int commentaireDebutBataille() {
-	printf("  La bataille va pouvoir commencer.");
+	printf("   La bataille va pouvoir commencer.\n");
 	return 1;
 }
 

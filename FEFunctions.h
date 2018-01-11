@@ -7,8 +7,8 @@ int secuScanInt();
 int lireCommande(int* x, int* y);
 
 int dist(int a, int b, int c, int d);
-int estAProximite(Monde* monde, int x, int y, int dist);
-int videAcessibilite(Monde* monde);
+int creeAccessibilite(Monde* monde, int x, int y, int dist);
+int videAccessibilite(Monde* monde);
 
 int afficheDeuxChiffres (int x);
 int afficheMonde (Monde monde, const char* armesChar);
@@ -22,7 +22,9 @@ Unite* trouveUnite(Monde monde, int x, int y);
 int leveUnite (Monde* monde, Unite* unite);
 int poseUnite (Monde* monde, Unite* unite, int x, int y);
 int deplaceUnite (Monde* monde, Unite* unite, int x, int y);
+int blesseUnite (Monde* monde, Unite* unite, int degat);
 bool estLibre(Monde monde, int x, int y);
+bool estAlliee(Unite* unite, char couleur);
 
 int commentaireIntro();
 int commentaireDebutBataille();

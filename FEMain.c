@@ -37,21 +37,22 @@ int main () {
 	int a = 0; /*int pour identifier les armes*/
 	int n = 0; /*int pour identifier le nombre d'unités*/
 	int c = 0; /*int pour identifier la couleur*/
-	int i = 0;
+
 	int tmpX, tmpY;
-	bool tmpCond;
+	int ptDegat;
+	bool entreeOk;
 	Unite* uniteTmp;
-	Unite* uniteAlliee;
-	Unite* uniteEnnemie;
+	Unite* uniteJoueur;
+	Unite* uniteCible;
 
 	char couleurActive = 'R';
 	int idCouleurActive = 0;
 
 	initMonde(&monde);
 
+	afficheMonde(monde, armesChar);
 	while(!jeuFini) {
 
-		afficheMonde(monde, armesChar);
 
 		switch(etatDuJeu) {
 			case(0): /*placement initial des unités sur le plateau*/
@@ -61,18 +62,21 @@ int main () {
 					for (n=0; n<monde.stats[a].nombre; n++) {
 						for (c=0; c<NBCOULEURS; c++) {
 
-							printf("  Joueur %s, entrez les coordonées de votre %s %d/%d\n",couleursMots[c],armesMots[a], (n+1),monde.stats[a].nombre);
+							printf("   Joueur %s, entrez les coordonées de votre %s %d/%d\n",couleursMots[c],armesMots[a], (n+1),monde.stats[a].nombre);
+
+							tmpX = -1;
+							tmpY = -1;
+							entreeOk = false;
 							
 							do {
-								tmpX = -1;
-								tmpY = -1;
 								lireCommande(&tmpX, &tmpY);
-								
-								if (!estLibre(monde, tmpX, tmpY)) {
-									printf("  choisissez une case vide\n");
+
+								entreeOk = estLibre(monde, tmpX, tmpY);					
+								if (!entreeOk) {
+									printf("   choisissez une case vide\n");
 								}
 							
-							} while (!estLibre(monde, tmpX, tmpY));
+							} while (!entreeOk);
 
 							uniteTmp = creeUnite(couleursChar[c], a,tmpX,tmpY, monde.stats[a].vie);
 							insereUnite(&monde.infosJoueurs[c], uniteTmp);
@@ -83,59 +87,137 @@ int main () {
 						}
 					}
 				}
-				afficheMonde(monde, armesChar);
 				commentaireDebutBataille();
 				etatDuJeu = 1;
 				break;
 
 
 			case(1): /*sélectionner une unité*/
-				printf("  Joueur %s, choisissez une unité à déplacer.\n",couleursMots[idCouleurActive]);
-				do {
-					tmpX = -1;
-					tmpY = -1;
-					lireCommande(&tmpX, &tmpY);
-					
-					if (!selectionnable(monde, couleurActive, tmpX, tmpY)) {
-						printf("  choisissez une unité de votre couleur\n");
-					}
-				} while (!selectionnable(monde, couleurActive, tmpX, tmpY));
+				printf("   Joueur %s, choisissez une unité à déplacer.\n",couleursMots[idCouleurActive]);
 
-				uniteAlliee = trouveUnite(monde, tmpX, tmpY);
+				tmpX = -1;
+				tmpY = -1;
+				entreeOk = false;
+				
+				do {
+					lireCommande(&tmpX, &tmpY);
+
+					entreeOk = selectionnable(monde, couleurActive, tmpX, tmpY);
+					
+					if (!entreeOk) {
+						printf("   choisissez une unité de votre couleur\n");
+					}
+				} while (!entreeOk);
+
+				uniteJoueur = trouveUnite(monde, tmpX, tmpY);
 				etatDuJeu = 2;
 				break;
 
 			case(2): /*déplacer l'unité*/
-				estAProximite(&monde, uniteAlliee->posX, uniteAlliee->posY, monde.stats[uniteAlliee->arme].endurance);
+				creeAccessibilite(&monde, uniteJoueur->posX, uniteJoueur->posY, monde.stats[uniteJoueur->arme].endurance);
 		
 				afficheMonde(monde, armesChar);
 		
-				printf("  Joueur %s, déplacez votre unité en x:%d, y:%d vers une case libre\n",couleursMots[idCouleurActive], uniteAlliee->posX, uniteAlliee->posY);
+				printf("   Joueur %s, déplacez votre unité en x:%d, y:%d vers une case libre\n",couleursMots[idCouleurActive], uniteJoueur->posX, uniteJoueur->posY);
+				
+				tmpX = -1;
+				tmpY = -1;
+				entreeOk = false;
 
 				do {
-					tmpX = -1;
-					tmpY = -1;
 					lireCommande(&tmpX, &tmpY);
 					
-					if (!(estLibre(monde, tmpX, tmpY) || (tmpX == uniteAlliee->posX && tmpY == uniteAlliee->posY))) {
-						printf("  choisissez une case libre\n");
+					entreeOk = ((estLibre(monde, tmpX, tmpY) && monde.accessible[tmpX][tmpY]) || (tmpX == uniteJoueur->posX && tmpY == uniteJoueur->posY)); 
+					
+					if (!entreeOk) {
+						printf("   choisissez une case libre et à votre portée\n");
 					}
-				} while (!(estLibre(monde, tmpX, tmpY) || (tmpX == uniteAlliee->posX && tmpY == uniteAlliee->posY)));
+				} while (!entreeOk);
 
-				deplaceUnite (&monde, uniteAlliee,tmpX, tmpY);
-				videAcessibilite(&monde);
+				deplaceUnite (&monde, uniteJoueur,tmpX, tmpY);
+				videAccessibilite(&monde);
 
 				etatDuJeu = 3;
 				break;
 			
-			case(3):
-			
+			case(3):/*choisi une unité à attaquer*/
+
+				creeAccessibilite(&monde, uniteJoueur->posX, uniteJoueur->posY, monde.stats[uniteJoueur->arme].portee);
+
 				afficheMonde(monde, armesChar);
-		
-				while(true);
+				printf("   Joueur %s, choisissez une case à attaquer avec votre unité en x:%d, y:%d\n",couleursMots[idCouleurActive], uniteJoueur->posX, uniteJoueur->posY);
+
+				tmpX = -1;
+				tmpY = -1;
+				entreeOk = false;
+				ptDegat = 0;
+
+				do {
+					lireCommande(&tmpX, &tmpY);
+					
+					entreeOk = (monde.accessible[tmpX][tmpY]); 
+					
+					if (!entreeOk) {
+						printf("   choisissez une case à votre portée\n");
+					}
+				} while (!entreeOk);
+
+
+				videAccessibilite(&monde);
+				etatDuJeu = 4;
 				break;
 
-			default: break;
+			case(4):/*blesse l'unité attaquée*/
+
+				/*si le coup est donné dans le vide : il ne se passe rien*/
+				if (estLibre(monde, tmpX, tmpY)) {
+						afficheMonde(monde, armesChar);
+						printf("   votre arme aterri dans la case x:%d, y:%d et se plante dans l'herbe\n", tmpX,tmpY);
+				} else {
+					/*blesse l'unité visée*/ 
+					uniteCible = trouveUnite(monde, tmpX,tmpY);
+			
+					 if (estAlliee(uniteCible, uniteJoueur->couleur)) {
+						ptDegat = 1;
+						blesseUnite(&monde, uniteCible, ptDegat);
+						afficheMonde(monde, armesChar);
+						printf("   Par maladresse, vous ateignez un allié en x:%d, y:%d de votre arme,\n   et lui infligez %dpt de dégat\n", tmpX,tmpY, ptDegat);
+				
+					} else {
+						ptDegat = monde.stats[uniteJoueur->arme].force;
+						blesseUnite(&monde, uniteCible, ptDegat);
+
+						afficheMonde(monde, armesChar);
+						printf("   Votre arme s'abat sur l'ennemi en x:%d, y:%d, et lui inflige %dpt de dégat\n", tmpX,tmpY,ptDegat);
+					}
+					
+					/*vérifie si l'unité visée est morte*/
+					if (monde.plateau[tmpX][tmpY] = NULL) {
+						printf("   L'unite en x:%d, y:%d meurt. RIP",tmpX,tmpY);
+					}
+				}
+
+				etatDuJeu = 5;
+				break;
+
+			case(5):/*passe le tour à l'autre joeur*/
+				
+				if (couleurActive == ROUGE) {
+					couleurActive = BLEU;
+					idCouleurActive = IDBLEU;
+				}	
+				else {
+					couleurActive = ROUGE;
+					idCouleurActive = IDROUGE;
+				}
+
+				monde.tour ++;
+				etatDuJeu = 1;
+			break;
+
+			default: 
+				printf("! Le programme ne devrait pas pouvoir atteindre cet état\n");
+			break;
 		}
 
 	}
@@ -168,7 +250,7 @@ int main () {
 	lireCommande(&tmpX, &tmpY);
 
 	printf("tmpX : %d, tmpY : %d\n", tmpX, tmpY);
-	estAProximite(&monde, tmpX,tmpY,4);
+	creeAccessibilite(&monde, tmpX,tmpY,4);
 	afficheMonde(monde);
 	*/
 	return 0;
