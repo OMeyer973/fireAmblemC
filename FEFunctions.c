@@ -107,7 +107,7 @@ int lireCommande(int* x, int* y) {
 	  			*x = tmp;
 	  			xValide = true;
 	  		} else {
-	  		printf("Erreur : entrez une valeur entre 0 et %d pour ", (HAUT-1));
+	  		printf("Erreur : entrez une valeur entre 0 et %d\n", (HAUT-1));
 	  	}
   	}
 
@@ -119,7 +119,7 @@ int lireCommande(int* x, int* y) {
 	  			*y = tmp;
 	  			yValide = true;
 	  		} else {
-	  		printf("Erreur : entrez une valeur entre 0 et %d pour ", (LARG-1));
+	  		printf("Erreur : entrez une valeur entre 0 et %d\n", (LARG-1));
 	  	}
   	}
   	return 1;
@@ -148,6 +148,18 @@ int estAProximite(Monde* monde, int x, int y, int maxDist) {
 	return 1;
 }
 
+int videAcessibilite(Monde* monde) {
+	/*vide le tableau d'acessibilité*/
+	int i = 0;
+	int j = 0;
+	for (i=0; i<HAUT; i++) {
+		for (j=0; j<LARG; j++) {
+			monde->accessible[i][j] = false;
+		}
+	}
+	return 1;
+}
+
 
 
 int afficheDeuxChiffres (int x) {
@@ -161,7 +173,7 @@ int afficheDeuxChiffres (int x) {
 }
 
 
-int afficheMonde (Monde monde) {
+int afficheMonde (Monde monde, const char* armesChar) {
 	int x = 0;
 	int y = 0;
 	
@@ -174,38 +186,46 @@ int afficheMonde (Monde monde) {
 	}
 	printf("\n");
 
-	printf("x -------------------------------------------------------------------------------------------\n");
+	printf("x ┌────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┐\n");
 	
 	for (x=0; x<HAUT; x++) {
 		afficheDeuxChiffres(x);
 
 		for (y=0; y< LARG; y++) {
-			printf("|");
+			printf("│");
+
 			if (monde.plateau[x][y] == NULL) {
-				printf("   ");
+			/*dessine les cases vides*/
+				printf(" ");
 				if (monde.accessible[x][y]) {
-					printf("x");
+					printf("..");
 				} else {
-					printf(" ");	
+					printf("  ");	
 				}
+				printf(" ");
 			}
 
 			else {
+				/*dessine les cases avec des unités*/
 				printf("%c",monde.plateau[x][y]->couleur);
-				printf("%c",monde.plateau[x][y]->arme);
+				printf("%c",armesChar[monde.plateau[x][y]->arme]);
 				printf("%d",monde.plateau[x][y]->vie);
 
 				if (monde.plateau[x][y]->dort) {
 					printf("z");
 				} else if (monde.accessible[x][y]) {
-					printf("x");
+					printf("*");
 				} else {
 					printf(" ");	
 				}
 			}
 		}
-		printf("|\n");
-		printf("  -------------------------------------------------------------------------------------------\n");
+		printf("│\n");
+		if (x==HAUT-1) {
+			printf("  └────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┘\n");
+		} else {
+			printf("  ├────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┤\n");
+		}
 		
 	}
 	return 1;
@@ -262,9 +282,7 @@ bool selectionnable(Monde monde, char couleur, int x, int y) {
 	/*renvoie vrai si la case sélectionnée contient une unité sélectionnable
 	par le joueur d'une la couleur*/
 	if (monde.plateau[x][y] != NULL) {
-		printf("case occupée ok\n");
 		if (monde.plateau[x][y]->couleur == couleur) {
-			printf("couleur ok\n");
 			return true;
 		}
 	} 

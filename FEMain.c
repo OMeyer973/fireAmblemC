@@ -51,7 +51,7 @@ int main () {
 
 	while(!jeuFini) {
 
-		afficheMonde(monde);
+		afficheMonde(monde, armesChar);
 
 		switch(etatDuJeu) {
 			case(0): /*placement initial des unités sur le plateau*/
@@ -74,16 +74,16 @@ int main () {
 							
 							} while (!estLibre(monde, tmpX, tmpY));
 
-							uniteTmp = creeUnite(couleursChar[c], armesChar[a],tmpX,tmpY, monde.stats[a].vie);
+							uniteTmp = creeUnite(couleursChar[c], a,tmpX,tmpY, monde.stats[a].vie);
 							insereUnite(&monde.infosJoueurs[c], uniteTmp);
 							poseUnite(&monde, uniteTmp, tmpX, tmpY);
 
 								
-							afficheMonde(monde);
+							afficheMonde(monde, armesChar);
 						}
 					}
 				}
-				afficheMonde(monde);
+				afficheMonde(monde, armesChar);
 				commentaireDebutBataille();
 				etatDuJeu = 1;
 				break;
@@ -96,26 +96,43 @@ int main () {
 					tmpY = -1;
 					lireCommande(&tmpX, &tmpY);
 					
-					tmpCond = false;
-					tmpCond = selectionnable(monde, couleurActive, tmpX, tmpY); 
-					if (!tmpCond) {
+					if (!selectionnable(monde, couleurActive, tmpX, tmpY)) {
 						printf("  choisissez une unité de votre couleur\n");
 					}
-				} while (!tmpCond);
+				} while (!selectionnable(monde, couleurActive, tmpX, tmpY));
 
 				uniteAlliee = trouveUnite(monde, tmpX, tmpY);
 				etatDuJeu = 2;
 				break;
 
-			case(2):
-				/*
+			case(2): /*déplacer l'unité*/
 				estAProximite(&monde, uniteAlliee->posX, uniteAlliee->posY, monde.stats[uniteAlliee->arme].endurance);
-				afficheMonde(monde);
-				printf("  Joueur %s, déplacez votre unité.\n",couleursMots[idCouleurActive]);
-				*/
-				printf("CA PASSE\n");
+		
+				afficheMonde(monde, armesChar);
+		
+				printf("  Joueur %s, déplacez votre unité en x:%d, y:%d vers une case libre\n",couleursMots[idCouleurActive], uniteAlliee->posX, uniteAlliee->posY);
+
+				do {
+					tmpX = -1;
+					tmpY = -1;
+					lireCommande(&tmpX, &tmpY);
+					
+					if (!(estLibre(monde, tmpX, tmpY) || (tmpX == uniteAlliee->posX && tmpY == uniteAlliee->posY))) {
+						printf("  choisissez une case libre\n");
+					}
+				} while (!(estLibre(monde, tmpX, tmpY) || (tmpX == uniteAlliee->posX && tmpY == uniteAlliee->posY)));
+
+				deplaceUnite (&monde, uniteAlliee,tmpX, tmpY);
+				videAcessibilite(&monde);
+
 				etatDuJeu = 3;
-				while (true);
+				break;
+			
+			case(3):
+			
+				afficheMonde(monde, armesChar);
+		
+				while(true);
 				break;
 
 			default: break;

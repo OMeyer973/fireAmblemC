@@ -2,12 +2,17 @@
 
 
 int initMonde (Monde* monde);
+
 int secuScanInt();
 int lireCommande(int* x, int* y);
+
 int dist(int a, int b, int c, int d);
 int estAProximite(Monde* monde, int x, int y, int dist);
+int videAcessibilite(Monde* monde);
+
 int afficheDeuxChiffres (int x);
-int afficheMonde (Monde monde);
+int afficheMonde (Monde monde, const char* armesChar);
+
 Unite* creeUnite(char couleur, int arme, int x, int y, int vie);
 int insereUnite(InfoJoueur* joueur, Unite* unite);
 int afficheListe(InfoJoueur infoJoueur);
