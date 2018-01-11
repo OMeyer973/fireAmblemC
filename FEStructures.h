@@ -45,9 +45,11 @@ typedef struct unite{ /*infos sur une unité dans l'armée d'un joueur*/
 	int vie; /*nombre de points de vie de l'unité*/
 } Unite;
 
+typedef Unite* UListe;
+
 typedef struct infoJoueur { /*donne des infos sur l'armée du joueur*/
 	int nbUnites; /*nombre d'unités du joueur*/
-	Unite* unites; /*liste des unités du joueur*/
+	UListe unites; /*liste des unités du joueur*/
 }InfoJoueur;
 
 typedef struct monde{ /*contient toutes les infos relatives à la partie en cours*/

@@ -23,33 +23,54 @@ int initMonde (Monde* monde) {
 
 	/*definition des stats*/
 	monde->stats[IDHACHE].nombre 	= 3;
-	monde->stats[IDHACHE].endurance= 3;
+	monde->stats[IDHACHE].endurance = 3;
 	monde->stats[IDHACHE].portee 	= 1;
 	monde->stats[IDHACHE].vie 		= 7;
 	monde->stats[IDHACHE].force 	= 4;
 
-	monde->stats[IDLANCE].nombre 	= 3;
-	monde->stats[IDLANCE].endurance= 5;
+	monde->stats[IDLANCE].nombre 	= 2;
+	monde->stats[IDLANCE].endurance = 5;
 	monde->stats[IDLANCE].portee 	= 2;
 	monde->stats[IDLANCE].vie 		= 6;
 	monde->stats[IDLANCE].force 	= 2;
 
-	monde->stats[IDEPEE].nombre 	= 3;
+	monde->stats[IDEPEE].nombre 	= 2;
 	monde->stats[IDEPEE].endurance	= 4;
 	monde->stats[IDEPEE].portee 	= 1;
 	monde->stats[IDEPEE].vie 		= 6;
-	monde->stats[IDEPEE].force 	= 3;
+	monde->stats[IDEPEE].force 		= 3;
 
-	monde->stats[IDARC].nombre 	= 4;
+	monde->stats[IDARC].nombre 		= 2;
 	monde->stats[IDARC].endurance 	= 3;
-	monde->stats[IDARC].portee 	= 4;
+	monde->stats[IDARC].portee 		= 4;
 	monde->stats[IDARC].vie 		= 5;
 	monde->stats[IDARC].force 		= 3;
-
+	/*	
 	Unite uniteTmp;
 	uniteTmp.suiv = 0;
-	monde->infosJoueurs[ROUGE].unites = &uniteTmp;
+	monde->infosJoueurs[IDROUGE].unites = &uniteTmp;
 	monde->infosJoueurs[IDBLEU].unites = &uniteTmp;
+	*/
+	monde->infosJoueurs[IDROUGE].unites = NULL;
+	monde->infosJoueurs[IDBLEU].unites = NULL;
+
+	Unite* uniteTmp;
+	uniteTmp = creeUnite(ROUGE, HACHE,-1,-1, monde->stats[IDHACHE].vie);
+	insereUnite(&(monde->infosJoueurs[IDROUGE]), uniteTmp);
+	uniteTmp = creeUnite(ROUGE, HACHE,-1,-1, monde->stats[IDHACHE].vie);
+	insereUnite(&(monde->infosJoueurs[IDROUGE]), uniteTmp);
+	uniteTmp = creeUnite(ROUGE, HACHE,-1,-1, monde->stats[IDHACHE].vie);
+	insereUnite(&(monde->infosJoueurs[IDROUGE]), uniteTmp);
+	monde->infosJoueurs[IDROUGE].nbUnites = 0;
+	
+	uniteTmp = creeUnite(BLEU, HACHE,-1,-1, monde->stats[IDHACHE].vie);
+	insereUnite(&(monde->infosJoueurs[IDBLEU]), uniteTmp);
+	uniteTmp = creeUnite(BLEU, HACHE,-1,-1, monde->stats[IDHACHE].vie);
+	insereUnite(&(monde->infosJoueurs[IDBLEU]), uniteTmp);
+	uniteTmp = creeUnite(BLEU, HACHE,-1,-1, monde->stats[IDHACHE].vie);
+	insereUnite(&(monde->infosJoueurs[IDBLEU]), uniteTmp);
+	monde->infosJoueurs[IDBLEU].nbUnites = 0;
+	
 	return 1;
 }
 
@@ -214,28 +235,102 @@ int insereUnite(InfoJoueur* joueur, Unite* unite) {
 	return 1;
 }
 
+int afficheListe(InfoJoueur infoJoueur) {
+	int i = 0;
+	printf("nb d'unites dasn la liste %d\n",infoJoueur.nbUnites);
+	
+	/*while (infoJoueur.unites != NULL){*/
+	for (i=0; i<= infoJoueur.nbUnites; i++) {
+
+		printf(" arme : %c\n",infoJoueur.unites->arme);
+
+		infoJoueur.unites = infoJoueur.unites->suiv;
+	}
+	return 1;
+}
+
 Unite* trouveUnite(Monde monde, int x, int y) {
 	/*retourne l'unité présente sur une case du tableau*/
 	return monde.plateau[x][y];
 }
 
-int supprimeUnite(Monde* monde, Unite* unite) {
+int supprimeUniteBroken(Monde* monde, Unite* unite) {
 	/*
 	supprime l'unite de son armée et du plateau de jeu
 	ne vérifie pas les paramètres
 	*/
 	/*
 	/!!!\
+	- bug : fais une segfault quand il y a <= 3 élément dans la liste
 	- penser à bien vérifier que le dernier élément 
 	des listes d'unités des joueurs pointe vers un 0 
 	sinon segfault
 	/!!!\
 	*/
 
+	
+	if (unite->couleur == ROUGE) {
+		monde->infosJoueurs[IDROUGE].nbUnites --;
+	} 
+
+	if (unite->couleur == BLEU) {
+		monde->infosJoueurs[IDBLEU].nbUnites --;
+	} 
+	
 	free(unite);
-		
-	unite->suiv = unite->suiv->suiv;
+	
 	monde->plateau[unite->posX][unite->posY] = NULL;
+
+	unite = unite->suiv;
+	
+	return 1;
+}
+
+int supprimeUnite(Monde * monde, Unite * unite){
+	
+	/*bug : fais des segfaults pour les listes de nb <= 2*/
+
+	int x = unite -> posX, y = unite -> posY;
+
+	char color = unite -> couleur;
+	UListe tmp, prev;
+
+	if ((tmp = malloc(sizeof(Unite))) == NULL){
+		printf("malloc error\n");
+		exit(EXIT_FAILURE);
+	}
+	if (color == ROUGE) {
+		tmp = monde->infosJoueurs[IDROUGE].unites;
+		monde->infosJoueurs[IDROUGE].nbUnites--;
+	}
+	else if (color == BLEU) {
+		tmp = monde->infosJoueurs[IDBLEU].unites;
+		monde->infosJoueurs[IDBLEU].nbUnites--;
+	}
+
+
+	if (tmp != NULL && ((tmp->posX == x) && (tmp->posY == y))){
+		if (color == ROUGE) 	monde -> infosJoueurs[IDROUGE].unites = monde -> infosJoueurs[IDROUGE].unites -> suiv;
+		else if (color == BLEU) monde -> infosJoueurs[IDBLEU].unites = monde -> infosJoueurs[IDBLEU].unites -> suiv;
+		free(tmp);
+		monde -> plateau[x][y] = NULL;
+		return 1;
+	}
+
+	prev = tmp;
+	while (tmp != NULL && (tmp->posX != x || tmp->posY != y)){
+		prev = tmp;
+		tmp = tmp -> suiv;
+	}
+
+	if (tmp == NULL){
+		printf("Unit was not in Linked List !\n");
+		return -1;
+	}
+	
+	prev -> suiv = tmp -> suiv;
+	free(tmp);
+	monde -> plateau[x][y] = NULL;
 	return 1;
 }
 
@@ -289,7 +384,10 @@ int commentaireIntro() {
 	return 1;
 }
 
-
+int commentaireDebutBataille() {
+	printf("  La bataille va pouvoir commencer.");
+	return 1;
+}
 
 
 
@@ -314,6 +412,7 @@ int supprimeUniteDepuisMonde(Monde* monde, int x, int y) {
 	*/
 	/*
 	/!!!\
+	- fait des segfalut quand il y a <= 3 unites
 	- penser à bien vérifier que le dernier élément 
 	des listes d'unités des joueurs pointe vers un 0 
 	sinon segfault
@@ -325,9 +424,9 @@ int supprimeUniteDepuisMonde(Monde* monde, int x, int y) {
 
 	if  (monde->plateau[x][y]->couleur == ROUGE) {
 		/*check si l'unité est au joueur rouge*/
-		unitesTmp = monde->infosJoueurs[ROUGE].unites;
+		unitesTmp = monde->infosJoueurs[IDROUGE].unites;
 
-		monde->infosJoueurs[ROUGE].nbUnites --;
+		monde->infosJoueurs[IDROUGE].nbUnites --;
 	} 
 	else if (monde->plateau[x][y]->couleur == BLEU) {
 		/*check si l'unité est au joueur bleu*/
@@ -338,7 +437,7 @@ int supprimeUniteDepuisMonde(Monde* monde, int x, int y) {
 
 	/*retire l'unité de la liste*/
 	while (unitesTmp->suiv != 0){
-		if (unitesTmp->posX == x && unitesTmp->posY == y) {
+		if (unitesTmp->suiv->posX == x && unitesTmp->suiv->posY == y) {
 			
 			free(unitesTmp);
 			

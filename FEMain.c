@@ -10,8 +10,8 @@ int main () {
 
 	/*string des charactères des couleurs et des armes, 
 	pour pouvoir les obtenir grâce à in id numérique*/
-	char couleursChar[NBCOULEURS] ="RB";
-	char armesChar[NBARMES] = "HLEA";
+	const char couleursChar[NBCOULEURS] ="RB";
+	const char armesChar[NBARMES] = "HLEA";
 
 	/*tableau de string des mots des couleurs et des armes 
 	pour écrire des commentaires à partir des ID*/
@@ -39,7 +39,7 @@ int main () {
 	Unite* uniteTmp;
 
 	initMonde(&monde);
-	
+	/*
 	while(!jeuFini) {
 
 		afficheMonde(monde);
@@ -73,12 +73,17 @@ int main () {
 					}
 				}
 				afficheMonde(monde);
+				commentaireDebutBataille();
+				etatDuJeu = 1;
+				break;
 
-			break;
+			case(1): 
+
+				break;
 		}
 
 	}
-	
+	*/
 
 
 
@@ -87,14 +92,18 @@ int main () {
 
 
 	for (i=0; i<monde.stats[IDHACHE].nombre; i++) {
+		printf("adding a unit\n");
 		uniteTmp = creeUnite(ROUGE, HACHE,4,i, monde.stats[IDHACHE].vie);
 		insereUnite(&monde.infosJoueurs[IDROUGE], uniteTmp);
 		monde.plateau[4][i] = uniteTmp;
 	}
 	afficheMonde(monde);
 
+	afficheListe(monde.infosJoueurs[IDROUGE]);
 	uniteTmp = trouveUnite(monde,4,2);
+	afficheListe(monde.infosJoueurs[IDROUGE]);
 	supprimeUnite(&monde,uniteTmp);
+	afficheListe(monde.infosJoueurs[IDROUGE]);
 	afficheMonde(monde);
 
 	uniteTmp = trouveUnite(monde,4,1);
