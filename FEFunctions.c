@@ -178,7 +178,7 @@ int afficheMonde (Monde monde, const char* armesChar) {
 	int y = 0;
 	
 	/*affiche numéro des colones*/
-	printf("\n   y");
+	printf("\n\n   y");
 	for (y=0; y< LARG; y++) {
 		printf(" ");
 		afficheDeuxChiffres(y);

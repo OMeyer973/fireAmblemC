@@ -53,6 +53,7 @@ int main () {
 	afficheMonde(monde, armesChar);
 	while(!jeuFini) {
 
+		printf("xx----x----xx\n  tour N°%d",monde.tour);
 
 		switch(etatDuJeu) {
 			case(0): /*placement initial des unités sur le plateau*/
@@ -192,7 +193,7 @@ int main () {
 					}
 					
 					/*vérifie si l'unité visée est morte*/
-					if (monde.plateau[tmpX][tmpY] = NULL) {
+					if (monde.plateau[tmpX][tmpY] == NULL) {
 						printf("   L'unite en x:%d, y:%d meurt. RIP",tmpX,tmpY);
 					}
 				}
