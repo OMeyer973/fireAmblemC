@@ -15,6 +15,9 @@ Unite* trouveUnite(Monde monde, int x, int y);
 int leveUnite (Monde* monde, Unite* unite);
 int poseUnite (Monde* monde, Unite* unite, int x, int y);
 int deplaceUnite (Monde* monde, Unite* unite, int x, int y);
+bool estLibre(Monde monde, int x, int y);
+
+int commentaireIntro();
 
 
 

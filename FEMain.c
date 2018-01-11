@@ -7,13 +7,33 @@
 
 
 int main () {
+
+	/*string des charactères des couleurs et des armes, 
+	pour pouvoir les obtenir grâce à in id numérique*/
+	char couleursChar[NBCOULEURS] ="RB";
+	char armesChar[NBARMES] = "HLEA";
+
+	/*tableau de string des mots des couleurs et des armes 
+	pour écrire des commentaires à partir des ID*/
+	const char *couleursMots[NBARMES];
+	couleursMots[0] = "rouge";
+	couleursMots[1] = "bleu";
+
+	const char *armesMots[NBARMES];
+	armesMots[0] = "hache";
+	armesMots[1] = "lance";
+	armesMots[2] = "epee";
+	armesMots[3] = "arc";
+	
 	Monde monde;
 	bool jeuFini = false;
 	int etatDuJeu = 0;
 	/*
 	0 : placement des amrées sur le plateau
 	*/
-
+	int a = 0;
+	int n = 0;
+	int c = 0;
 	int i = 0;
 	int tmpX, tmpY;
 	Unite* uniteTmp;
@@ -26,29 +46,31 @@ int main () {
 
 		switch(etatDuJeu) {
 			case(0):
+				commentaireIntro(); 
+				
+				for (a=0; a<NBARMES; a++) {
+					for (n=0; n<monde.stats[a].nombre; n++) {
+						for (c=0; c<NBCOULEURS; c++) {
 
-				printf("  Bienvenue dans FELite. Avant de commencer la bataille, les 2 joueurs doivent placer\n  leurs armées sur le champs de bataille.\n");
-				printf("  Chaque joueur a à sa disposition une armée composée de 3 Haches, 3 Lances, 3 Epees et 4 Arcs\n");
+							printf("  Joueur %s, entrez les coordonées de votre %s %d/%d\n",couleursMots[c],armesMots[a], (n+1),monde.stats[a].nombre);
+							
+							do {
+								lireCommande(&tmpX, &tmpY);
+								
+								if (!estLibre(monde, tmpX, tmpY)) {
+									printf("  choisissez une case vide\n");
+								}
+							
+							} while (!estLibre(monde, tmpX, tmpY));
 
-				/*POSER LES HACHES*/
-				for (i=0; i<monde.stats.hache.nombre; i++) {
-					/*POSER HACHE ROUGE*/
-					printf("  Joueur Rouge, entrez les coordonées de votre Hache %d/%d\n",(i+1),monde.stats.hache.nombre);
+							uniteTmp = creeUnite(couleursChar[c], armesChar[a],tmpX,tmpY, monde.stats[a].vie);
+							insereUnite(&monde.infosJoueurs[c], uniteTmp);
+							poseUnite(&monde, uniteTmp, tmpX, tmpY);
 
-					lireCommande(&tmpX, &tmpY);
-					uniteTmp = creeUnite(ROUGE, HACHE,tmpX,tmpY, monde.stats.hache.vie);
-					insereUnite(&monde.rouge, uniteTmp);
-					poseUnite(&monde, uniteTmp, tmpX, tmpY);
-					afficheMonde(monde);
-
-					/*POSER HACHE BLEU*/
-					printf("  Joueur bleu, entrez les coordonées de votre Hache %d/%d\n",(i+1),monde.stats.hache.nombre);
-
-					lireCommande(&tmpX, &tmpY);
-					uniteTmp = creeUnite(BLEU, HACHE,tmpX,tmpY, monde.stats.hache.vie);
-					insereUnite(&monde.bleu, uniteTmp);
-					poseUnite(&monde, uniteTmp, tmpX, tmpY);
-					afficheMonde(monde);
+								
+							afficheMonde(monde);
+						}
+					}
 				}
 				afficheMonde(monde);
 
@@ -64,9 +86,9 @@ int main () {
 	/* DEBUG CODE*/
 
 
-	for (i=0; i<monde.stats.hache.nombre; i++) {
-		uniteTmp = creeUnite(ROUGE, HACHE,4,i, monde.stats.hache.vie);
-		insereUnite(&monde.rouge, uniteTmp);
+	for (i=0; i<monde.stats[IDHACHE].nombre; i++) {
+		uniteTmp = creeUnite(ROUGE, HACHE,4,i, monde.stats[IDHACHE].vie);
+		insereUnite(&monde.infosJoueurs[IDROUGE], uniteTmp);
 		monde.plateau[4][i] = uniteTmp;
 	}
 	afficheMonde(monde);

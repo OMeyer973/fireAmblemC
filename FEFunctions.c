@@ -22,34 +22,34 @@ int initMonde (Monde* monde) {
 		}
 
 	/*definition des stats*/
-	monde->stats.hache.nombre 	= 3;
-	monde->stats.hache.endurance= 3;
-	monde->stats.hache.portee 	= 1;
-	monde->stats.hache.vie 		= 7;
-	monde->stats.hache.force 	= 4;
+	monde->stats[IDHACHE].nombre 	= 3;
+	monde->stats[IDHACHE].endurance= 3;
+	monde->stats[IDHACHE].portee 	= 1;
+	monde->stats[IDHACHE].vie 		= 7;
+	monde->stats[IDHACHE].force 	= 4;
 
-	monde->stats.lance.nombre 	= 3;
-	monde->stats.lance.endurance= 5;
-	monde->stats.lance.portee 	= 2;
-	monde->stats.lance.vie 		= 6;
-	monde->stats.lance.force 	= 2;
+	monde->stats[IDLANCE].nombre 	= 3;
+	monde->stats[IDLANCE].endurance= 5;
+	monde->stats[IDLANCE].portee 	= 2;
+	monde->stats[IDLANCE].vie 		= 6;
+	monde->stats[IDLANCE].force 	= 2;
 
-	monde->stats.epee.nombre 	= 3;
-	monde->stats.epee.endurance	= 4;
-	monde->stats.epee.portee 	= 1;
-	monde->stats.epee.vie 		= 6;
-	monde->stats.epee.force 	= 3;
+	monde->stats[IDEPEE].nombre 	= 3;
+	monde->stats[IDEPEE].endurance	= 4;
+	monde->stats[IDEPEE].portee 	= 1;
+	monde->stats[IDEPEE].vie 		= 6;
+	monde->stats[IDEPEE].force 	= 3;
 
-	monde->stats.arc.nombre 	= 4;
-	monde->stats.arc.endurance 	= 3;
-	monde->stats.arc.portee 	= 4;
-	monde->stats.arc.vie 		= 5;
-	monde->stats.arc.force 		= 3;
+	monde->stats[IDARC].nombre 	= 4;
+	monde->stats[IDARC].endurance 	= 3;
+	monde->stats[IDARC].portee 	= 4;
+	monde->stats[IDARC].vie 		= 5;
+	monde->stats[IDARC].force 		= 3;
 
 	Unite uniteTmp;
 	uniteTmp.suiv = 0;
-	monde->rouge.unites = &uniteTmp;
-	monde->bleu.unites = &uniteTmp;
+	monde->infosJoueurs[ROUGE].unites = &uniteTmp;
+	monde->infosJoueurs[IDBLEU].unites = &uniteTmp;
 	return 1;
 }
 
@@ -94,7 +94,7 @@ int lireCommande(int* x, int* y) {
 		tmp = -1;
 		printf("  - y : ");
 		tmp = secuScanInt();
-    	if (tmp >= 0 && tmp < HAUT) {
+    	if (tmp >= 0 && tmp < LARG) {
 	  			*y = tmp;
 	  			yValide = true;
 	  		} else {
@@ -274,6 +274,20 @@ int blesseUnite (Monde* monde, Unite* unite, int degat) {
 	return 1;
 }
 
+bool estLibre(Monde monde, int x, int y) {
+	if (monde.plateau[x][y] == NULL) {
+		return true;
+	}
+	return false;
+}
+
+
+int commentaireIntro() {
+	printf("  Bienvenue dans FELite. Avant de commencer la bataille, les %d joueurs doivent placer\n  leurs armées sur le champs de bataille.\n",NBCOULEURS);
+	printf("  Chaque joueur a à sa disposition une armée composée de 3 Haches, 3 Lances, 3 Epees et 4 Arcs.\n");
+
+	return 1;
+}
 
 
 
@@ -311,15 +325,15 @@ int supprimeUniteDepuisMonde(Monde* monde, int x, int y) {
 
 	if  (monde->plateau[x][y]->couleur == ROUGE) {
 		/*check si l'unité est au joueur rouge*/
-		unitesTmp = monde->rouge.unites;
+		unitesTmp = monde->infosJoueurs[ROUGE].unites;
 
-		/*monde->rouge.nbUnites --;*/
+		monde->infosJoueurs[ROUGE].nbUnites --;
 	} 
 	else if (monde->plateau[x][y]->couleur == BLEU) {
 		/*check si l'unité est au joueur bleu*/
-		unitesTmp = monde->bleu.unites;
+		unitesTmp = monde->infosJoueurs[IDBLEU].unites;
 
-		monde->bleu.nbUnites --;
+		monde->infosJoueurs[IDBLEU].nbUnites --;
 	}
 
 	/*retire l'unité de la liste*/

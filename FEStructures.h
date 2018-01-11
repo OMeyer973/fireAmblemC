@@ -10,11 +10,24 @@
 #define ROUGE 'R' /*identifiant du premier joueur*/
 #define BLEU 'B' /*identifiant du deuxi`eme joueur*/
 
+/*les ID des 2 couleurs dans le monde*/
+#define NBCOULEURS 2
+#define IDROUGE 0
+#define IDBLEU 1
+
 /* les armes des unités*/
 #define HACHE 'H'
 #define LANCE 'L'
 #define EPEE 'E'
 #define ARC 'A'
+
+/*les id des armes dans les stats*/
+#define NBARMES 4
+#define IDHACHE 0
+#define IDLANCE 1
+#define IDEPEE 2
+#define IDARC 3
+
 
 typedef struct ustat{ /*structure contenant les statistiques d'une unitée donnée*/
 	int nombre; /*nombre d'unités de ce type dans les armées*/
@@ -23,13 +36,6 @@ typedef struct ustat{ /*structure contenant les statistiques d'une unitée donn�
 	int vie; /*points de vie de l'unité*/
 	int force; /*dommages que l'unité inflige en attaquant*/
 } Ustat;
-
-typedef struct stats{/*structure contenant les statistiques de tous les types d'unités*/
-	Ustat hache;
-	Ustat lance;
-	Ustat epee;
-	Ustat arc;
-} Stats;
 
 typedef struct unite{ /*infos sur une unité dans l'armée d'un joueur*/
 	char couleur; /*R ou B pour ROUGE ou BLEU*/
@@ -48,8 +54,8 @@ typedef struct monde{ /*contient toutes les infos relatives à la partie en cour
 	Unite* plateau[HAUT][LARG];
 	bool accessible[HAUT][LARG]; /*tableau donnant des renseignement sur la proximité de certaines cases par rapport à l'unité jouant*/
 	int tour; /* Numero du tour */
-	Stats stats; /*statistiques concernant les types d'unités du jeu*/
-	InfoJoueur rouge, bleu; /*Listes des unités des deux joueurs*/
+	Ustat stats[4]; /*statistiques concernant les types d'unités du jeu*/
+	InfoJoueur infosJoueurs[2]; /*Listes des unités des deux joueurs*/
 } Monde;
 
 
