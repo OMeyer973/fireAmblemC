@@ -11,6 +11,13 @@ int afficheMonde (Monde monde);
 Unite* creeUnite(char couleur, char arme, int x, int y, int vie);
 int insereUnite(InfoJoueur* joueur, Unite* unite);
 int supprimeUnite(Monde* monde, Unite* unite);
-int supprimeUniteDepuisMonde(Monde* monde, int x, int y);
 Unite* trouveUnite(Monde monde, int x, int y);
+int leveUnite (Monde* monde, Unite* unite);
+int poseUnite (Monde* monde, Unite* unite, int x, int y);
 int deplaceUnite (Monde* monde, Unite* unite, int x, int y);
+
+
+
+
+/*fonctions obsolètes*/
+int supprimeUniteDepuisMonde(Monde* monde, int x, int y);

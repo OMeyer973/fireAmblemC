@@ -80,7 +80,7 @@ int lireCommande(int* x, int* y) {
 
 	while (!xValide) {
 		tmp = -1;
-		printf("x : ");
+		printf("  - x : ");
 		tmp = secuScanInt();
     	if (tmp >= 0 && tmp < HAUT) {
 	  			*x = tmp;
@@ -92,7 +92,7 @@ int lireCommande(int* x, int* y) {
 
   	while (!yValide) {
 		tmp = -1;
-		printf("y : ");
+		printf("  - y : ");
 		tmp = secuScanInt();
     	if (tmp >= 0 && tmp < HAUT) {
 	  			*y = tmp;
@@ -214,6 +214,84 @@ int insereUnite(InfoJoueur* joueur, Unite* unite) {
 	return 1;
 }
 
+Unite* trouveUnite(Monde monde, int x, int y) {
+	/*retourne l'unité présente sur une case du tableau*/
+	return monde.plateau[x][y];
+}
+
+int supprimeUnite(Monde* monde, Unite* unite) {
+	/*
+	supprime l'unite de son armée et du plateau de jeu
+	ne vérifie pas les paramètres
+	*/
+	/*
+	/!!!\
+	- penser à bien vérifier que le dernier élément 
+	des listes d'unités des joueurs pointe vers un 0 
+	sinon segfault
+	/!!!\
+	*/
+
+	free(unite);
+		
+	unite->suiv = unite->suiv->suiv;
+	monde->plateau[unite->posX][unite->posY] = NULL;
+	return 1;
+}
+
+int poseUnite (Monde* monde, Unite* unite, int x, int y) {
+	/*pose une unité sur une case du plateau
+	Attention : si l'unité est déjà présente sur le plateau, 
+	elle sera présente en double !*/
+	unite->posX = x;
+	unite->posY = y;
+	monde->plateau[x][y] = unite;
+	return 1;
+}
+
+int leveUnite (Monde* monde, Unite* unite) {
+	/*retire une unité du plateau 
+	sans la supprimer de l'armée du joeur
+	pré-requis : l'unité est bien présente sur le plateau.*/
+	monde->plateau[unite->posX][unite->posY] = NULL;
+	return 1;
+}
+
+int deplaceUnite (Monde* monde, Unite* unite, int x, int y) {
+	/*déplace une unité vers une nouvelle position sur le plateau*/
+	leveUnite (monde, unite);
+	poseUnite (monde, unite, x, y); 
+	return 1;
+}
+
+int blesseUnite (Monde* monde, Unite* unite, int degat) {
+	/*blesse une unité d'un certain nombre de points de dégat
+	et la supprime si elle n'a plus de points de vie*/
+	unite->vie -= degat;
+	if (unite->vie <= 0) {
+		supprimeUnite(monde,unite);
+	}
+	return 1;
+}
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+   FONCTIONS OBSOLETES A SUPRIMER QUAND ON SERA SUR 
+
+*/
+
+
+
 int supprimeUniteDepuisMonde(Monde* monde, int x, int y) {
 	/*
 	suprime de la liste unites 
@@ -259,52 +337,3 @@ int supprimeUniteDepuisMonde(Monde* monde, int x, int y) {
 	return 0;
 }
 
-int supprimeUnite(Monde* monde, Unite* unite) {
-	/*
-	suprime de la liste unites 
-	l'unite se trouvant sur la plateau aux coordonées  x y
-	ne vérifie pas les paramètres
-	*/
-	/*
-	/!!!\
-	- penser à bien vérifier que le dernier élément 
-	des listes d'unités des joueurs pointe vers un 0 
-	sinon segfault
-	- ne pas exécuter sur une case vide sinon segfault
-	/!!!\
-	*/
-
-	Unite* unitesTmp = unite;
-
-	/*retire l'unité de la liste*/
-			
-	free(unitesTmp);
-		
-	unitesTmp->suiv = unitesTmp->suiv->suiv;
-	monde->plateau[unite->posX][unite->posY] = NULL;
-	return 1;
-}
-
-Unite* trouveUnite(Monde monde, int x, int y) {
-	/*retourne l'unité présente sur une case du tableau*/
-	return monde.plateau[x][y];
-}
-
-int deplaceUnite (Monde* monde, Unite* unite, int x, int y) {
-	/*déplace une unité vers une nouvelle position sur le plateau*/
-	monde->plateau[unite->posX][unite->posY] = NULL;
-	unite->posX = x;
-	unite->posY = y;
-	monde->plateau[x][y] = unite;
-	return 1;
-}
-
-int blesseUnite (Monde* monde, Unite* unite, int degat) {
-	/*blesse une unité d'un certain nombre de points de dégat
-	et la supprime si elle n'a plus de points de vie*/
-	unite->vie -= degat;
-	if (unite->vie <= 0) {
-		supprimeUnite(monde,unite);
-	}
-	return 1;
-}
