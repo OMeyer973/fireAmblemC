@@ -53,8 +53,6 @@ int main () {
 	afficheMonde(monde, armesChar);
 	while(!jeuFini) {
 
-		printf("xx----x----xx\n  tour N°%d",monde.tour);
-
 		switch(etatDuJeu) {
 			case(0): /*placement initial des unités sur le plateau*/
 				commentaireIntro(); 
@@ -94,6 +92,7 @@ int main () {
 
 
 			case(1): /*sélectionner une unité*/
+				printf("     ============================\n       tour N°%d du joueur %s\n     ============================\n",monde.tour,couleursMots[idCouleurActive]);
 				printf("   Joueur %s, choisissez une unité à déplacer.\n",couleursMots[idCouleurActive]);
 
 				tmpX = -1;
@@ -210,9 +209,9 @@ int main () {
 				else {
 					couleurActive = ROUGE;
 					idCouleurActive = IDROUGE;
+					monde.tour ++;
 				}
 
-				monde.tour ++;
 				etatDuJeu = 1;
 			break;
 

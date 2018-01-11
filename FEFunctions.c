@@ -434,7 +434,7 @@ bool estAlliee(Unite* unite, char couleur) {
 
 
 int commentaireIntro() {
-	printf("   Bienvenue dans FELite. Avant de commencer la bataille, les %d joueurs doivent placer\n   leurs armées sur le champs de bataille.\n",NBCOULEURS);
+	printf("     ==========================\n       Bienvenue dans FELite.\n     ==========================\n   Avant de commencer la bataille, les %d joueurs doivent placer\n   leurs armées sur le champs de bataille.\n",NBCOULEURS);
 	printf("   Chaque joueur a à sa disposition une armée composée de 1 Haches, 1 Lances, 1 Epees et 1 Arcs.\n");
 
 	return 1;
