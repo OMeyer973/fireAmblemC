@@ -39,17 +39,18 @@ typedef struct ustat{ /*structure contenant les statistiques d'une unitée donn�
 
 typedef struct unite{ /*infos sur une unité dans l'armée d'un joueur*/
 	char couleur; /*R ou B pour ROUGE ou BLEU*/
-	char arme; /*H L E ou A pour hache, lance, épée, arc*/
+	int arme; /*0 1 2 3 pour hache, lance, épée, arc*/
 	struct unite *suiv; /*liste des unités suivantes*/
 	int posX, posY; /*pour stocker les coordonnées de l'unité*/
 	int vie; /*nombre de points de vie de l'unité*/
+	bool dort; /*renesigne si l'unité dort ou a fini son tour*/
 } Unite;
 
 typedef Unite* UListe;
 
 typedef struct infoJoueur { /*donne des infos sur l'armée du joueur*/
 	int nbUnites; /*nombre d'unités du joueur*/
-	UListe unites; /*liste des unités du joueur*/
+	UListe unites; /*liste chaînée des unités du joueur*/
 }InfoJoueur;
 
 typedef struct monde{ /*contient toutes les infos relatives à la partie en cours*/

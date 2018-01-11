@@ -22,25 +22,25 @@ int initMonde (Monde* monde) {
 		}
 
 	/*definition des stats*/
-	monde->stats[IDHACHE].nombre 	= 3;
+	monde->stats[IDHACHE].nombre 	= 1;
 	monde->stats[IDHACHE].endurance = 3;
 	monde->stats[IDHACHE].portee 	= 1;
 	monde->stats[IDHACHE].vie 		= 7;
 	monde->stats[IDHACHE].force 	= 4;
 
-	monde->stats[IDLANCE].nombre 	= 2;
+	monde->stats[IDLANCE].nombre 	= 1;
 	monde->stats[IDLANCE].endurance = 5;
 	monde->stats[IDLANCE].portee 	= 2;
 	monde->stats[IDLANCE].vie 		= 6;
 	monde->stats[IDLANCE].force 	= 2;
 
-	monde->stats[IDEPEE].nombre 	= 2;
+	monde->stats[IDEPEE].nombre 	= 1;
 	monde->stats[IDEPEE].endurance	= 4;
 	monde->stats[IDEPEE].portee 	= 1;
 	monde->stats[IDEPEE].vie 		= 6;
 	monde->stats[IDEPEE].force 		= 3;
 
-	monde->stats[IDARC].nombre 		= 2;
+	monde->stats[IDARC].nombre 		= 1;
 	monde->stats[IDARC].endurance 	= 3;
 	monde->stats[IDARC].portee 		= 4;
 	monde->stats[IDARC].vie 		= 5;
@@ -182,18 +182,26 @@ int afficheMonde (Monde monde) {
 		for (y=0; y< LARG; y++) {
 			printf("|");
 			if (monde.plateau[x][y] == NULL) {
-				printf("   ");	
+				printf("   ");
+				if (monde.accessible[x][y]) {
+					printf("x");
+				} else {
+					printf(" ");	
+				}
 			}
+
 			else {
 				printf("%c",monde.plateau[x][y]->couleur);
 				printf("%c",monde.plateau[x][y]->arme);
 				printf("%d",monde.plateau[x][y]->vie);
-			}
-			
-			if (monde.accessible[x][y]) {
+
+				if (monde.plateau[x][y]->dort) {
+					printf("z");
+				} else if (monde.accessible[x][y]) {
 					printf("x");
-			} else {
-				printf(" ");
+				} else {
+					printf(" ");	
+				}
 			}
 		}
 		printf("|\n");
@@ -203,7 +211,7 @@ int afficheMonde (Monde monde) {
 	return 1;
 }
 
-Unite* creeUnite(char couleur, char arme, int x, int y, int vie) {
+Unite* creeUnite(char couleur, int arme, int x, int y, int vie) {
 	/*créé une unité,
 	défini son arme ses coordonnées
 	et retourne l'adresse de l'unite
@@ -221,6 +229,7 @@ Unite* creeUnite(char couleur, char arme, int x, int y, int vie) {
     tmp->posX = x;
     tmp->posY = y;
     tmp->vie = vie;
+    tmp->dort = false;
 
 	return tmp;
 }
@@ -249,10 +258,27 @@ int afficheListe(InfoJoueur infoJoueur) {
 	return 1;
 }
 
+bool selectionnable(Monde monde, char couleur, int x, int y) {
+	/*renvoie vrai si la case sélectionnée contient une unité sélectionnable
+	par le joueur d'une la couleur*/
+	if (monde.plateau[x][y] != NULL) {
+		printf("case occupée ok\n");
+		if (monde.plateau[x][y]->couleur == couleur) {
+			printf("couleur ok\n");
+			return true;
+		}
+	} 
+	return false;
+}
+
 Unite* trouveUnite(Monde monde, int x, int y) {
 	/*retourne l'unité présente sur une case du tableau*/
 	return monde.plateau[x][y];
 }
+
+
+
+
 
 int supprimeUniteBroken(Monde* monde, Unite* unite) {
 	/*
@@ -379,7 +405,7 @@ bool estLibre(Monde monde, int x, int y) {
 
 int commentaireIntro() {
 	printf("  Bienvenue dans FELite. Avant de commencer la bataille, les %d joueurs doivent placer\n  leurs armées sur le champs de bataille.\n",NBCOULEURS);
-	printf("  Chaque joueur a à sa disposition une armée composée de 3 Haches, 3 Lances, 3 Epees et 4 Arcs.\n");
+	printf("  Chaque joueur a à sa disposition une armée composée de 1 Haches, 1 Lances, 1 Epees et 1 Arcs.\n");
 
 	return 1;
 }

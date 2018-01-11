@@ -30,22 +30,31 @@ int main () {
 	int etatDuJeu = 0;
 	/*
 	0 : placement des amrées sur le plateau
+	1 : sélectionner une unité
+	2 : déplacer une unité
+	3 : attaquer une unitée
 	*/
-	int a = 0;
-	int n = 0;
-	int c = 0;
+	int a = 0; /*int pour identifier les armes*/
+	int n = 0; /*int pour identifier le nombre d'unités*/
+	int c = 0; /*int pour identifier la couleur*/
 	int i = 0;
 	int tmpX, tmpY;
+	bool tmpCond;
 	Unite* uniteTmp;
+	Unite* uniteAlliee;
+	Unite* uniteEnnemie;
+
+	char couleurActive = 'R';
+	int idCouleurActive = 0;
 
 	initMonde(&monde);
-	/*
+
 	while(!jeuFini) {
 
 		afficheMonde(monde);
 
 		switch(etatDuJeu) {
-			case(0):
+			case(0): /*placement initial des unités sur le plateau*/
 				commentaireIntro(); 
 				
 				for (a=0; a<NBARMES; a++) {
@@ -55,6 +64,8 @@ int main () {
 							printf("  Joueur %s, entrez les coordonées de votre %s %d/%d\n",couleursMots[c],armesMots[a], (n+1),monde.stats[a].nombre);
 							
 							do {
+								tmpX = -1;
+								tmpY = -1;
 								lireCommande(&tmpX, &tmpY);
 								
 								if (!estLibre(monde, tmpX, tmpY)) {
@@ -77,19 +88,46 @@ int main () {
 				etatDuJeu = 1;
 				break;
 
-			case(1): 
 
+			case(1): /*sélectionner une unité*/
+				printf("  Joueur %s, choisissez une unité à déplacer.\n",couleursMots[idCouleurActive]);
+				do {
+					tmpX = -1;
+					tmpY = -1;
+					lireCommande(&tmpX, &tmpY);
+					
+					tmpCond = false;
+					tmpCond = selectionnable(monde, couleurActive, tmpX, tmpY); 
+					if (!tmpCond) {
+						printf("  choisissez une unité de votre couleur\n");
+					}
+				} while (!tmpCond);
+
+				uniteAlliee = trouveUnite(monde, tmpX, tmpY);
+				etatDuJeu = 2;
 				break;
+
+			case(2):
+				/*
+				estAProximite(&monde, uniteAlliee->posX, uniteAlliee->posY, monde.stats[uniteAlliee->arme].endurance);
+				afficheMonde(monde);
+				printf("  Joueur %s, déplacez votre unité.\n",couleursMots[idCouleurActive]);
+				*/
+				printf("CA PASSE\n");
+				etatDuJeu = 3;
+				while (true);
+				break;
+
+			default: break;
 		}
 
 	}
-	*/
 
 
 
 
 	/* DEBUG CODE*/
-
+	/*
 
 	for (i=0; i<monde.stats[IDHACHE].nombre; i++) {
 		printf("adding a unit\n");
@@ -115,6 +153,6 @@ int main () {
 	printf("tmpX : %d, tmpY : %d\n", tmpX, tmpY);
 	estAProximite(&monde, tmpX,tmpY,4);
 	afficheMonde(monde);
-	
+	*/
 	return 0;
 }
