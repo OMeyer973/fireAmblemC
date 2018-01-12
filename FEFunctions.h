@@ -3,34 +3,34 @@
 
 int initMonde (Monde* monde);
 
-int secuScanInt();
-int lireCommande(int* x, int* y);
+int secuScanInt ();
+int lireCommande (int* x, int* y);
 
 int dist(int a, int b, int c, int d);
-int creeAccessibilite(Monde* monde, int x, int y, int dist);
-int videAccessibilite(Monde* monde);
+int creeAccessibilite (Monde* monde, int x, int y, int dist);
+int videAccessibilite (Monde* monde);
 
 int afficheDeuxChiffres (int x);
-int afficheMonde (Monde monde, const char* armesChar);
+int afficheMonde (Monde monde);
 
-Unite* creeUnite(char couleur, int arme, int x, int y, int vie);
-int insereUnite(InfoJoueur* joueur, Unite* unite);
-int afficheListe(InfoJoueur infoJoueur);
-bool selectionnable(Monde monde, char couleur, int x, int y);
-int supprimeUnite(Monde* monde, Unite* unite);
-Unite* trouveUnite(Monde monde, int x, int y);
+Unite* creeUnite (char couleur, int arme, int x, int y, int vie);
+int insereUnite (InfoJoueur* joueur, Unite* unite);
+int afficheListe (InfoJoueur infoJoueur);
+bool selectionnable (Monde monde, char couleur, int x, int y);
+int supprimeUnite (Monde* monde, Unite* unite);
+Unite* trouveUnite (Monde monde, int x, int y);
 int leveUnite (Monde* monde, Unite* unite);
 int poseUnite (Monde* monde, Unite* unite, int x, int y);
 int deplaceUnite (Monde* monde, Unite* unite, int x, int y);
 int blesseUnite (Monde* monde, Unite* unite, int degat);
-bool estLibre(Monde monde, int x, int y);
-bool estAlliee(Unite* unite, char couleur);
+bool estLibre (Monde monde, int x, int y);
+bool estAlliee (Unite* unite, char couleur);
 
-int commentaireIntro();
-int commentaireDebutBataille();
+int commentaireIntro ();
+int commentaireDebutBataille ();
 
 
 
 
 /*fonctions obsolètes*/
-int supprimeUniteDepuisMonde(Monde* monde, int x, int y);
+int supprimeUniteDepuisMonde (Monde* monde, int x, int y);

@@ -45,12 +45,20 @@ int initMonde (Monde* monde) {
 	monde->stats[IDARC].portee 		= 4;
 	monde->stats[IDARC].vie 		= 5;
 	monde->stats[IDARC].force 		= 3;
-	/*	
-	Unite uniteTmp;
-	uniteTmp.suiv = 0;
-	monde->infosJoueurs[IDROUGE].unites = &uniteTmp;
-	monde->infosJoueurs[IDBLEU].unites = &uniteTmp;
-	*/
+
+
+	monde->textes.couleursMots[0] = "rouge";
+	monde->textes.couleursMots[1] = "bleu";
+	monde->textes.couleursChar = "RB";
+
+	monde->textes.armesMots[0] = "hache";
+	monde->textes.armesMots[1] = "lance";
+	monde->textes.armesMots[2] = "epee";
+	monde->textes.armesMots[3] = "arc";
+	monde->textes.armesChar = "HLEA";
+
+
+	/*init unites*/
 	monde->infosJoueurs[IDROUGE].unites = NULL;
 	monde->infosJoueurs[IDBLEU].unites = NULL;
 
@@ -88,7 +96,7 @@ int secuScanInt() {
         		return tmp;
      		}
 		}
-		printf("Erreur : veuillez entrer un int : ");
+		printf("Erreur : veuillez entrer un int : \n   - ");
   	}
 }
 
@@ -173,7 +181,7 @@ int afficheDeuxChiffres (int x) {
 }
 
 
-int afficheMonde (Monde monde, const char* armesChar) {
+int afficheMonde (Monde monde) {
 	int x = 0;
 	int y = 0;
 	
@@ -209,7 +217,7 @@ int afficheMonde (Monde monde, const char* armesChar) {
 			else {
 				/*dessine les cases avec des unités*/
 				printf("%c",monde.plateau[x][y]->couleur);
-				printf("%c",armesChar[monde.plateau[x][y]->arme]);
+				printf("%c",monde.textes.armesChar[monde.plateau[x][y]->arme]);
 				printf("%d",monde.plateau[x][y]->vie);
 
 				if (monde.plateau[x][y]->dort) {

@@ -53,12 +53,25 @@ typedef struct infoJoueur { /*donne des infos sur l'armée du joueur*/
 	UListe unites; /*liste chaînée des unités du joueur*/
 }InfoJoueur;
 
+typedef struct textes {
+	/*string des charactères des couleurs et des armes, 
+	pour pouvoir les obtenir grâce à in id numérique*/
+	const char *couleursChar;
+	const char *armesChar;
+
+	/*tableau de string des mots des couleurs et des armes 
+	pour écrire des commentaires à partir des ID*/
+	const char *couleursMots[NBCOULEURS];
+	const char *armesMots[NBARMES];
+} Textes;
+
 typedef struct monde{ /*contient toutes les infos relatives à la partie en cours*/
 	Unite* plateau[HAUT][LARG];
 	bool accessible[HAUT][LARG]; /*tableau donnant des renseignement sur la proximité de certaines cases par rapport à l'unité jouant*/
 	int tour; /* Numero du tour */
 	Ustat stats[4]; /*statistiques concernant les types d'unités du jeu*/
 	InfoJoueur infosJoueurs[2]; /*Listes des unités des deux joueurs*/
+	Textes textes;
 } Monde;
 
 
