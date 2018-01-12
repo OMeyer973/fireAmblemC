@@ -92,7 +92,7 @@ int main () {
 
 
 			case(1): /*sélectionner une unité*/
-				printf("     ============================\n       tour N°%d du joueur %s\n     ============================\n",monde.tour,couleursMots[idCouleurActive]);
+				printf("     ============================\n       Tour N°%d du joueur %s\n     ============================\n",monde.tour,couleursMots[idCouleurActive]);
 				printf("   Joueur %s, choisissez une unité à déplacer.\n",couleursMots[idCouleurActive]);
 
 				tmpX = -1;
@@ -181,7 +181,7 @@ int main () {
 						ptDegat = 1;
 						blesseUnite(&monde, uniteCible, ptDegat);
 						afficheMonde(monde, armesChar);
-						printf("   Par maladresse, vous ateignez un allié en x:%d, y:%d de votre arme,\n   et lui infligez %dpt de dégat\n", tmpX,tmpY, ptDegat);
+						printf("   Par maladresse, vous ateignez un allié en x:%d, y:%d de votre arme,\n   et lui infligez %dpt de dégat. Ouille\n", tmpX,tmpY, ptDegat);
 				
 					} else {
 						ptDegat = monde.stats[uniteJoueur->arme].force;
@@ -193,7 +193,8 @@ int main () {
 					
 					/*vérifie si l'unité visée est morte*/
 					if (monde.plateau[tmpX][tmpY] == NULL) {
-						printf("   L'unite en x:%d, y:%d meurt. RIP",tmpX,tmpY);
+						printf("   L'unite en x:%d, y:%d meurt. RIP\n",tmpX,tmpY);
+						printf("   Il reste %d unites au joueur %s et %d unites au joueur %s\n",monde.infosJoueurs[IDROUGE].nbUnites, couleursMots[IDROUGE], monde.infosJoueurs[IDBLEU].nbUnites, couleursMots[IDBLEU]);
 					}
 				}
 
@@ -201,6 +202,15 @@ int main () {
 				break;
 
 			case(5):/*passe le tour à l'autre joeur*/
+
+				c = 0;
+				for (c=0; c<NBCOULEURS; c++) {
+					if (monde.infosJoueurs[c].nbUnites == 0) {
+						printf("   L'armée du joueur %s est vaincue\n", couleursMots[c]);
+						printf("     =========================================\n       Le joueur %s remporte la victoire !\n     =========================================\n",couleursMots[(c+1)%2]);
+							jeuFini = true;
+					}
+				}
 				
 				if (couleurActive == ROUGE) {
 					couleurActive = BLEU;
