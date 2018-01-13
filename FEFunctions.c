@@ -9,7 +9,9 @@
 
 
 int initMonde (Monde* monde) {
-	monde->tour = 0;
+	monde->infoJeu.tour = 0;
+	monde->infoJeu.etatDuJeu = 0;
+	monde->infoJeu.couleurActive = 0;
 
 	/*init plateau*/
 	int x = 0;
@@ -216,7 +218,7 @@ int afficheMonde (Monde monde) {
 
 			else {
 				/*dessine les cases avec des unités*/
-				printf("%c",monde.plateau[x][y]->couleur);
+				printf("%c",monde.textes.couleursChar[monde.plateau[x][y]->couleur]);
 				printf("%c",monde.textes.armesChar[monde.plateau[x][y]->arme]);
 				printf("%d",monde.plateau[x][y]->vie);
 
@@ -240,7 +242,7 @@ int afficheMonde (Monde monde) {
 	return 1;
 }
 
-Unite* creeUnite(char couleur, int arme, int x, int y, int vie) {
+Unite* creeUnite(int couleur, int arme, int x, int y, int vie) {
 	/*créé une unité,
 	défini son arme ses coordonnées
 	et retourne l'adresse de l'unite
@@ -287,7 +289,7 @@ int afficheListe(InfoJoueur infoJoueur) {
 	return 1;
 }
 
-bool selectionnable(Monde monde, char couleur, int x, int y) {
+bool selectionnable(Monde monde, int couleur, int x, int y) {
 	/*renvoie vrai si la case sélectionnée contient une unité sélectionnable
 	par le joueur d'une la couleur*/
 	if (monde.plateau[x][y] != NULL) {
@@ -344,27 +346,20 @@ int supprimeUnite(Monde * monde, Unite * unite){
 	/*bug : fais des segfaults pour les listes de nb <= 2*/
 
 	int x = unite -> posX, y = unite -> posY;
+	int color = unite -> couleur;
 
-	char color = unite -> couleur;
 	UListe tmp, prev;
 
 	if ((tmp = malloc(sizeof(Unite))) == NULL){
 		printf("malloc error\n");
 		exit(EXIT_FAILURE);
 	}
-	if (color == ROUGE) {
-		tmp = monde->infosJoueurs[IDROUGE].unites;
-		monde->infosJoueurs[IDROUGE].nbUnites--;
-	}
-	else if (color == BLEU) {
-		tmp = monde->infosJoueurs[IDBLEU].unites;
-		monde->infosJoueurs[IDBLEU].nbUnites--;
-	}
 
+	tmp = monde->infosJoueurs[color].unites;
+	monde->infosJoueurs[color].nbUnites--;
 
 	if (tmp != NULL && ((tmp->posX == x) && (tmp->posY == y))){
-		if (color == ROUGE) 	monde -> infosJoueurs[IDROUGE].unites = monde -> infosJoueurs[IDROUGE].unites -> suiv;
-		else if (color == BLEU) monde -> infosJoueurs[IDBLEU].unites = monde -> infosJoueurs[IDBLEU].unites -> suiv;
+		monde -> infosJoueurs[color].unites = monde -> infosJoueurs[color].unites -> suiv;
 		free(tmp);
 		monde -> plateau[x][y] = NULL;
 		return 1;
@@ -430,7 +425,7 @@ bool estLibre(Monde monde, int x, int y) {
 	return false;
 }
 
-bool estAlliee(Unite* unite, char couleur) {
+bool estAlliee(Unite* unite, int couleur) {
 	/*renvoie vrai si l'unite est de la couleur couleur*/
 	if (unite->couleur == couleur) {
 		return true;

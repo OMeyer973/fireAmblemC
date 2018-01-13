@@ -38,7 +38,7 @@ typedef struct ustat{ /*structure contenant les statistiques d'une unitée donn�
 } Ustat;
 
 typedef struct unite{ /*infos sur une unité dans l'armée d'un joueur*/
-	char couleur; /*R ou B pour ROUGE ou BLEU*/
+	int couleur; /*R ou B pour ROUGE ou BLEU*/
 	int arme; /*0 1 2 3 pour hache, lance, épée, arc*/
 	struct unite *suiv; /*liste des unités suivantes*/
 	int posX, posY; /*pour stocker les coordonnées de l'unité*/
@@ -52,6 +52,14 @@ typedef struct infoJoueur { /*donne des infos sur l'armée du joueur*/
 	int nbUnites; /*nombre d'unités du joueur*/
 	UListe unites; /*liste chaînée des unités du joueur*/
 }InfoJoueur;
+
+typedef struct infoJeu { /*des informations sur le déroulement de la partie en cours*/
+	int tour; /* Numero du tour */
+	int etatDuJeu;
+	int couleurActive;
+	Unite* uniteJoueur;
+	Unite* uniteCible;
+} InfoJeu;
 
 typedef struct textes {
 	/*string des charactères des couleurs et des armes, 
@@ -68,9 +76,9 @@ typedef struct textes {
 typedef struct monde{ /*contient toutes les infos relatives à la partie en cours*/
 	Unite* plateau[HAUT][LARG];
 	bool accessible[HAUT][LARG]; /*tableau donnant des renseignement sur la proximité de certaines cases par rapport à l'unité jouant*/
-	int tour; /* Numero du tour */
 	Ustat stats[4]; /*statistiques concernant les types d'unités du jeu*/
 	InfoJoueur infosJoueurs[2]; /*Listes des unités des deux joueurs*/
+	InfoJeu infoJeu;
 	Textes textes;
 } Monde;
 

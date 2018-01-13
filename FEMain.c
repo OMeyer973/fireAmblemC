@@ -9,40 +9,43 @@
 int main () {
 
 	Monde monde;
-	bool jeuFini = false;
-	int etatDuJeu = 0;
-	/*
-	0 : placement des armées sur le plateau
-	1 : sélectionner une unité
-	2 : déplacer une unité
-	3 : choisi une unité à attaquer
-	4 : blesse l'unité attaquée
-	5 : vérifie que le jeu ne soit pas fini
-	6 : passe le tour à l'autre joueur
-	*/
+	
+	Unite* uniteJoueur;
+	Unite* uniteCible;
+
+	
 	int a = 0; /*int pour identifier les armes*/
 	int n = 0; /*int pour identifier le nombre d'unités*/
 	int c = 0; /*int pour identifier la couleur*/
 
 	int tmpX, tmpY;
-	int ptDegat;
 	bool entreeOk;
-	Unite* uniteTmp;
-	Unite* uniteJoueur;
-	Unite* uniteCible;
 
-	char couleurActive = 'R';
-	int idCouleurActive = 0;
+	int ptDegat;
+
+
 
 	initMonde(&monde);
 
 	afficheMonde(monde);
-	while(!jeuFini) {
+	while(monde.infoJeu.etatDuJeu != 10) {
+		/* RAPPELS ETATS DU JEU :
+		0 : placement des armées sur le plateau
+		1 : sélectionner une unité
+		2 : déplacer une unité
+		3 : choisi une unité à attaquer
+		4 : blesse l'unité attaquée
+		5 : vérifie que le jeu ne soit pas fini
+		6 : passe le tour à l'autre joueur
+		10 : jeu fini (on sort du programme)
+		*/
 
-		switch(etatDuJeu) {
+		switch(monde.infoJeu.etatDuJeu) {
 			case(0): /*placement initial des unités sur le plateau*/
 				commentaireIntro(); 
 				
+				Unite* uniteTmp;
+			
 				for (a=0; a<NBARMES; a++) {
 					for (n=0; n<monde.stats[a].nombre; n++) {
 						for (c=0; c<NBCOULEURS; c++) {
@@ -63,7 +66,7 @@ int main () {
 							
 							} while (!entreeOk);
 
-							uniteTmp = creeUnite(monde.textes.couleursChar[c], a,tmpX,tmpY, monde.stats[a].vie);
+							uniteTmp = creeUnite(c, a,tmpX,tmpY, monde.stats[a].vie);
 							insereUnite(&monde.infosJoueurs[c], uniteTmp);
 							poseUnite(&monde, uniteTmp, tmpX, tmpY);
 
@@ -73,13 +76,13 @@ int main () {
 					}
 				}
 				commentaireDebutBataille();
-				etatDuJeu = 1;
+				monde.infoJeu.etatDuJeu = 1;
 				break;
 
 
 			case(1): /*sélectionner une unité*/
-				printf("     ============================\n       Tour N°%d du joueur %s\n     ============================\n",monde.tour,monde.textes.couleursMots[idCouleurActive]);
-				printf("   Joueur %s, choisissez une unité à déplacer.\n",monde.textes.couleursMots[idCouleurActive]);
+				printf("     ============================\n       Tour N°%d du joueur %s\n     ============================\n",monde.infoJeu.tour,monde.textes.couleursMots[monde.infoJeu.couleurActive]);
+				printf("   Joueur %s, choisissez une unité à déplacer.\n",monde.textes.couleursMots[monde.infoJeu.couleurActive]);
 
 				tmpX = -1;
 				tmpY = -1;
@@ -88,7 +91,7 @@ int main () {
 				do {
 					lireCommande(&tmpX, &tmpY);
 
-					entreeOk = selectionnable(monde, couleurActive, tmpX, tmpY);
+					entreeOk = selectionnable(monde, monde.infoJeu.couleurActive, tmpX, tmpY);
 					
 					if (!entreeOk) {
 						printf("   choisissez une unité de votre couleur\n");
@@ -96,7 +99,7 @@ int main () {
 				} while (!entreeOk);
 
 				uniteJoueur = trouveUnite(monde, tmpX, tmpY);
-				etatDuJeu = 2;
+				monde.infoJeu.etatDuJeu = 2;
 				break;
 
 			case(2): /*déplacer l'unité*/
@@ -104,7 +107,7 @@ int main () {
 		
 				afficheMonde(monde);
 		
-				printf("   Joueur %s, déplacez votre unité en x:%d, y:%d vers une case libre\n",monde.textes.couleursMots[idCouleurActive], uniteJoueur->posX, uniteJoueur->posY);
+				printf("   Joueur %s, déplacez votre unité en x:%d, y:%d vers une case libre\n",monde.textes.couleursMots[monde.infoJeu.couleurActive], uniteJoueur->posX, uniteJoueur->posY);
 				
 				tmpX = -1;
 				tmpY = -1;
@@ -123,7 +126,7 @@ int main () {
 				deplaceUnite (&monde, uniteJoueur,tmpX, tmpY);
 				videAccessibilite(&monde);
 
-				etatDuJeu = 3;
+				monde.infoJeu.etatDuJeu = 3;
 				break;
 			
 			case(3):/*choisi une unité à attaquer*/
@@ -131,12 +134,11 @@ int main () {
 				creeAccessibilite(&monde, uniteJoueur->posX, uniteJoueur->posY, monde.stats[uniteJoueur->arme].portee);
 
 				afficheMonde(monde);
-				printf("   Joueur %s, choisissez une case à attaquer avec votre unité en x:%d, y:%d\n",monde.textes.couleursMots[idCouleurActive], uniteJoueur->posX, uniteJoueur->posY);
+				printf("   Joueur %s, choisissez une case à attaquer avec votre unité en x:%d, y:%d\n",monde.textes.couleursMots[monde.infoJeu.couleurActive], uniteJoueur->posX, uniteJoueur->posY);
 
 				tmpX = -1;
 				tmpY = -1;
 				entreeOk = false;
-				ptDegat = 0;
 
 				do {
 					lireCommande(&tmpX, &tmpY);
@@ -150,10 +152,14 @@ int main () {
 
 
 				videAccessibilite(&monde);
-				etatDuJeu = 4;
+				monde.infoJeu.etatDuJeu = 4;
 				break;
 
 			case(4):/*blesse l'unité attaquée*/
+
+
+				ptDegat = 0;
+
 
 				/*si le coup est donné dans le vide : il ne se passe rien*/
 				if (estLibre(monde, tmpX, tmpY)) {
@@ -184,34 +190,36 @@ int main () {
 					}
 				}
 
-				etatDuJeu = 5;
+				monde.infoJeu.etatDuJeu = 5;
 				break;
 
 			case(5):/*vérifie que le jeu ne soit pas fini*/
 
 				c = 0;
+
 				for (c=0; c<NBCOULEURS; c++) {
 					if (monde.infosJoueurs[c].nbUnites == 0) {
 						printf("   L'armée du joueur %s est vaincue\n", monde.textes.couleursMots[c]);
 						printf("     =========================================\n       Le joueur %s remporte la victoire !\n     =========================================\n",monde.textes.couleursMots[(c+1)%2]);
-							jeuFini = true;
+							monde.infoJeu.etatDuJeu = 10;
 					}
 				}
-				etatDuJeu = 6;
+				
+				if (monde.infoJeu.etatDuJeu != 10){
+					monde.infoJeu.etatDuJeu = 6;
+				}
 				break;
 
 			case(6):/*passe le tour à l'autre joeur*/
-				if (couleurActive == ROUGE) {
-					couleurActive = BLEU;
-					idCouleurActive = IDBLEU;
+				if (monde.infoJeu.couleurActive == IDROUGE) {
+					monde.infoJeu.couleurActive = IDBLEU;
 				}	
 				else {
-					couleurActive = ROUGE;
-					idCouleurActive = IDROUGE;
-					monde.tour ++;
+					monde.infoJeu.couleurActive = IDROUGE;
+					monde.infoJeu.tour ++;
 				}
 
-				etatDuJeu = 1;
+				monde.infoJeu.etatDuJeu = 1;
 			break;
 
 			default: 
