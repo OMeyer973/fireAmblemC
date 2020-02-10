@@ -3,7 +3,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
+#include <MLV/MLV_all.h>
+#include <unistd.h>
 
 
 int main () {
@@ -12,6 +15,8 @@ int main () {
 	
 	Unite* uniteJoueur;
 	Unite* uniteCible;
+	Unite* uniteTmp;
+	char* texteInfos;
 
 	
 	int a = 0; /*int pour identifier les armes*/
@@ -23,11 +28,13 @@ int main () {
 
 	int ptDegat;
 
-
+	MLV_Keyboard_button sym;
+	MLV_Keyboard_modifier mod;
+	int unicode, mouse_x, mouse_y;
 
 	initMonde(&monde);
 
-	afficheMonde(monde);
+
 	while(monde.infoJeu.etatDuJeu != 10) {
 		/* RAPPELS ETATS DU JEU :
 		0 : placement des armées sur le plateau
@@ -42,175 +49,191 @@ int main () {
 
 		switch(monde.infoJeu.etatDuJeu) {
 			case(0): /*placement initial des unités sur le plateau*/
-				commentaireIntro(); 
 				
-				Unite* uniteTmp;
-			
-				for (a=0; a<NBARMES; a++) {
+				dessinePlateau(monde);
+				for (a=0; a<NBARMES; a++) { 
 					for (n=0; n<monde.stats[a].nombre; n++) {
 						for (c=0; c<NBCOULEURS; c++) {
-
-							printf("   Joueur %s, entrez les coordonées de votre %s %d/%d\n",monde.textes.couleursMots[c],monde.textes.armesMots[a], (n+1),monde.stats[a].nombre);
-
+							
 							tmpX = -1;
 							tmpY = -1;
-							entreeOk = false;
-							
-							do {
-								lireCommande(&tmpX, &tmpY);
 
-								entreeOk = estLibre(monde, tmpX, tmpY);					
+							/* On affiche les infos dans l'UI */
+							reinitialiseInfos(monde, c, 0);
+							prepareInfosIntro(&monde, c, a);
+
+							MLV_wait_keyboard_or_mouse( &sym, &mod, &unicode, &mouse_x, &mouse_y );
+							do{ /* On attend un clic et on vérifie s'il est valide (case du plateau vide) */
+								entreeOk = verifClicValide(&tmpX, &tmpY) && estLibre(monde, tmpX, tmpY);
 								if (!entreeOk) {
-									printf("   choisissez une case vide\n");
+									texteInfos = "Choisissez une case vide et valide\n";
+									reinitialiseInfos(monde, c, 0);
+									afficheInfos(texteInfos); /* On affiche un message si ce n'est pas le cas */
+									MLV_wait_keyboard_or_mouse( &sym, &mod, &unicode, &mouse_x, &mouse_y );
 								}
-							
 							} while (!entreeOk);
 
-							uniteTmp = creeUnite(c, a,tmpX,tmpY, monde.stats[a].vie);
+							/* S'il l'est, on ajoute l'unité et on la dessine */
+							uniteTmp = creeUnite(c, a, tmpX,tmpY, monde.stats[a].vie);
 							insereUnite(&monde.infosJoueurs[c], uniteTmp);
 							poseUnite(&monde, uniteTmp, tmpX, tmpY);
-
-								
-							afficheMonde(monde);
+							actualiseJeu(&monde);
+			
 						}
 					}
 				}
-				commentaireDebutBataille();
 				monde.infoJeu.etatDuJeu = 1;
-				break;
-
+			break;
 
 			case(1): /*sélectionner une unité*/
-				printf("     ============================\n       Tour N°%d du joueur %s\n     ============================\n",monde.infoJeu.tour,monde.textes.couleursMots[monde.infoJeu.couleurActive]);
-				printf("   Joueur %s, choisissez une unité à déplacer.\n",monde.textes.couleursMots[monde.infoJeu.couleurActive]);
-
 				tmpX = -1;
 				tmpY = -1;
-				entreeOk = false;
-				
-				do {
-					lireCommande(&tmpX, &tmpY);
 
-					entreeOk = selectionnable(monde, monde.infoJeu.couleurActive, tmpX, tmpY);
-					
+				/* On affiche les informations de la phase en cours dans l'UI */
+				actualiseJeu(&monde);
+				reinitialiseInfos(monde, monde.infoJeu.couleurActive, 1);
+				texteInfos = "Choisissez une unité à déplacer.\n";
+				afficheInfos(texteInfos);
+
+				MLV_wait_keyboard_or_mouse( &sym, &mod, &unicode, &mouse_x, &mouse_y );
+				do{ /* On attend un clic et on vérifie s'il est valide (clique sur une unité du joueur actif) */
+					entreeOk = verifClicValide(&tmpX, &tmpY) && selectionnable(monde, monde.infoJeu.couleurActive, tmpX, tmpY);
 					if (!entreeOk) {
-						printf("   choisissez une unité de votre couleur\n");
+						texteInfos = "Veuillez choisir une unité valide\n";
+						reinitialiseInfos(monde, monde.infoJeu.couleurActive, 1);
+						afficheInfos(texteInfos); /* On affiche un message si ce n'est pas le cas */
+						MLV_wait_keyboard_or_mouse( &sym, &mod, &unicode, &mouse_x, &mouse_y );
 					}
+
 				} while (!entreeOk);
 
+				/* S'il l'est, on met l'unité dans une variable de type Unite* pour l'utiliser par la suite */
 				uniteJoueur = trouveUnite(monde, tmpX, tmpY);
+
+
 				monde.infoJeu.etatDuJeu = 2;
-				break;
+			break;
 
 			case(2): /*déplacer l'unité*/
-				creeAccessibilite(&monde, uniteJoueur->posX, uniteJoueur->posY, monde.stats[uniteJoueur->arme].endurance);
-		
-				afficheMonde(monde);
-		
-				printf("   Joueur %s, déplacez votre unité en x:%d, y:%d vers une case libre\n",monde.textes.couleursMots[monde.infoJeu.couleurActive], uniteJoueur->posX, uniteJoueur->posY);
-				
+
+				/* On modifie les informations dans l'UI + on dessine le rayon de déplacement possible de l'unité sélectionnée */
+				reinitialiseInfos(monde, monde.infoJeu.couleurActive, 2);
+				dessineAccessibilite(&monde, uniteJoueur->posX, uniteJoueur->posY, monde.stats[uniteJoueur->arme].endurance);
+
 				tmpX = -1;
 				tmpY = -1;
-				entreeOk = false;
 
-				do {
-					lireCommande(&tmpX, &tmpY);
-					
-					entreeOk = ((estLibre(monde, tmpX, tmpY) && monde.accessible[tmpX][tmpY]) || (tmpX == uniteJoueur->posX && tmpY == uniteJoueur->posY)); 
-					
+				MLV_wait_keyboard_or_mouse( &sym, &mod, &unicode, &mouse_x, &mouse_y );
+				do{ /* On attend un clic et on vérifie s'il est valide (case à portée et vide) */
+					entreeOk = (verifClicValide(&tmpX, &tmpY) && monde.accessible[tmpX][tmpY]);
 					if (!entreeOk) {
-						printf("   choisissez une case libre et à votre portée\n");
+						texteInfos = "Choisissez une case vide et valide\n";
+						reinitialiseInfos(monde, monde.infoJeu.couleurActive, 2);
+						afficheInfos(texteInfos); /* On affiche un message si ce n'est pas le cas */
+						MLV_wait_keyboard_or_mouse( &sym, &mod, &unicode, &mouse_x, &mouse_y );
 					}
+
 				} while (!entreeOk);
 
-				deplaceUnite (&monde, uniteJoueur,tmpX, tmpY);
+				/* S'il l'est, on deplace l'unité, on vide le tableau d'accessibilité et on actualise le jeu */
+				leveUnite (&monde, uniteJoueur);
+				poseUnite (&monde, uniteJoueur, tmpX, tmpY);
 				videAccessibilite(&monde);
-
+				actualiseJeu(&monde);
 				monde.infoJeu.etatDuJeu = 3;
-				break;
-			
+			break;
+		
+
 			case(3):/*choisi une unité à attaquer*/
 
-				creeAccessibilite(&monde, uniteJoueur->posX, uniteJoueur->posY, monde.stats[uniteJoueur->arme].portee);
-
-				afficheMonde(monde);
-				printf("   Joueur %s, choisissez une case à attaquer avec votre unité en x:%d, y:%d\n",monde.textes.couleursMots[monde.infoJeu.couleurActive], uniteJoueur->posX, uniteJoueur->posY);
-
-				tmpX = -1;
-				tmpY = -1;
-				entreeOk = false;
-
-				do {
-					lireCommande(&tmpX, &tmpY);
+				/* On vérifie s'il y a des unités ennemies à portée. Si c'est le cas, on peut attaquer. Sinon le tour passe directement */
+				if(dessineAccessibiliteAttaque(&monde, uniteJoueur->posX, uniteJoueur->posY, monde.stats[uniteJoueur->arme].portee, uniteJoueur->couleur) != 0){
+					dessineAccessibiliteAttaque(&monde, uniteJoueur->posX, uniteJoueur->posY, monde.stats[uniteJoueur->arme].portee, uniteJoueur->couleur);
 					
-					entreeOk = (monde.accessible[tmpX][tmpY]); 
-					
-					if (!entreeOk) {
-						printf("   choisissez une case à votre portée\n");
-					}
-				} while (!entreeOk);
+					tmpX = -1;
+					tmpY = -1;
 
+					/* On modifie les infos dans l'UI */
+					reinitialiseInfos(monde, monde.infoJeu.couleurActive, 3);
+					texteInfos = "Choisissez une cible à attaquer.\nCliquez sur votre unité pour ne rien faire.";
+					afficheInfos(texteInfos);
 
-				videAccessibilite(&monde);
-				monde.infoJeu.etatDuJeu = 4;
-				break;
+					MLV_wait_keyboard_or_mouse( &sym, &mod, &unicode, &mouse_x, &mouse_y );
+					do{ /* On attend un clic et on vérifie s'il est valide (selection d'un ennemie à portée) */
+						entreeOk = verifClicValide(&tmpX, &tmpY) && monde.accessible[tmpX][tmpY];
+						if (!entreeOk) {
+							texteInfos = "Choisissez une case valide\n";
+							reinitialiseInfos(monde, monde.infoJeu.couleurActive, 3);
+							afficheInfos(texteInfos); /* On affiche un message si ce n'est pas le cas */
+							MLV_wait_keyboard_or_mouse( &sym, &mod, &unicode, &mouse_x, &mouse_y );
+						}
+					} while (!entreeOk);
+
+					actualiseJeu(&monde);
+					monde.infoJeu.etatDuJeu = 4;
+				}
+				else {
+					monde.infoJeu.etatDuJeu = 5;
+				}
+				endorsUnite(&monde, uniteJoueur);
+			break;	
 
 			case(4):/*blesse l'unité attaquée*/
-
-
-				ptDegat = 0;
-
-
-				/*si le coup est donné dans le vide : il ne se passe rien*/
-				if (estLibre(monde, tmpX, tmpY)) {
-						afficheMonde(monde);
-						printf("   votre arme aterri dans la case x:%d, y:%d et se plante dans l'herbe\n", tmpX,tmpY);
-				} else {
-					/*blesse l'unité visée*/ 
-					uniteCible = trouveUnite(monde, tmpX,tmpY);
-			
-					 if (estAlliee(uniteCible, uniteJoueur->couleur)) {
-						ptDegat = 1;
-						blesseUnite(&monde, uniteCible, ptDegat);
-						afficheMonde(monde);
-						printf("   Par maladresse, vous ateignez un allié en x:%d, y:%d de votre arme,\n   et lui infligez %dpt de dégat. Ouille\n", tmpX,tmpY, ptDegat);
-				
-					} else {
-						ptDegat = monde.stats[uniteJoueur->arme].force;
-						blesseUnite(&monde, uniteCible, ptDegat);
-
-						afficheMonde(monde);
-						printf("   Votre arme s'abat sur l'ennemi en x:%d, y:%d, et lui inflige %dpt de dégat\n", tmpX,tmpY,ptDegat);
-					}
-					
-					/*vérifie si l'unité visée est morte*/
-					if (monde.plateau[tmpX][tmpY] == NULL) {
-						printf("   L'unite en x:%d, y:%d meurt. RIP\n",tmpX,tmpY);
-						printf("   Il reste %d unites au joueur %s et %d unites au joueur %s\n",monde.infosJoueurs[IDROUGE].nbUnites, monde.textes.couleursMots[IDROUGE], monde.infosJoueurs[IDBLEU].nbUnites, monde.textes.couleursMots[IDBLEU]);
-					}
+				uniteCible = trouveUnite(monde, tmpX,tmpY);
+				if( (uniteCible->posX == uniteJoueur->posX) && (uniteCible->posY == uniteJoueur->posY) ){
+					/*ne fait rien si le joueur clique sur son unité*/
+					monde.infoJeu.etatDuJeu = 5;
 				}
+				else {
+					/* On calcule les points de dégâts, on les affiche et on les applique sur l'unité ciblée */
+					ptDegat = monde.stats[uniteJoueur->arme].force;
+					if( (uniteCible->arme < 3) && ( uniteCible->arme == ((uniteJoueur->arme+1)%3)) ){
+						ptDegat = ptDegat * 2;
+					}
 
+					affichageDegat(tmpX,tmpY, ptDegat);
+					blesseUnite(&monde, uniteCible, ptDegat);
+
+					if (monde.plateau[tmpX][tmpY] == NULL) {
+						/*si l'untée blessée meurt, les informations affichées dans l'UI ne sont pas les mêmes*/
+						actualiseJeu(&monde);
+						reinitialiseInfos(monde, monde.infoJeu.couleurActive, 3);
+						prepareInfosResultAttaque(&monde, ptDegat, 0);
+
+						/* Les informations sont plus longues. On rajoute de la pause pour que l'utilisateur puisse lire */
+						sleep(2);
+					}
+					else{
+						reinitialiseInfos(monde, monde.infoJeu.couleurActive, 3);
+						prepareInfosResultAttaque(&monde, ptDegat, 1);
+					}
+					sleep(2); /* Permet à l'utilisateur d'avoir le temps de lire avant le tour suivant qui réactualise l'UI */
+				}
 				monde.infoJeu.etatDuJeu = 5;
-				break;
+			break;
 
-			case(5):/*vérifie que le jeu ne soit pas fini*/
-
+			case(5): /*vérifie que le jeu ou le tour ne soient pas finis */
 				c = 0;
-
 				for (c=0; c<NBCOULEURS; c++) {
 					if (monde.infosJoueurs[c].nbUnites == 0) {
-						printf("   L'armée du joueur %s est vaincue\n", monde.textes.couleursMots[c]);
-						printf("     =========================================\n       Le joueur %s remporte la victoire !\n     =========================================\n",monde.textes.couleursMots[(c+1)%2]);
-							monde.infoJeu.etatDuJeu = 10;
+						reinitialiseInfos(monde, monde.infoJeu.couleurActive, 3);
+						prepareInfosFinPartie((char*)monde.textes.couleursMots[c], (char *)monde.textes.couleursMots[(c+1)%2]); /* On affiche un message si ce n'est pas le cas */
+						sleep(5);
+						monde.infoJeu.etatDuJeu = 10;
 					}
 				}
-				
-				if (monde.infoJeu.etatDuJeu != 10){
+				if (monde.infoJeu.etatDuJeu != 10) {
+					if (monde.infosJoueurs[monde.infoJeu.couleurActive].nbUnites > monde.infosJoueurs[monde.infoJeu.couleurActive].nbEndormis) {
+					/*Si toutes les unités ne sont pas endormies, on passe à l'étape suivante*/
+					monde.infoJeu.etatDuJeu = 1;
+				} else {
 					monde.infoJeu.etatDuJeu = 6;
 				}
-				break;
+				}
+			break;
 
 			case(6):/*passe le tour à l'autre joeur*/
+				reveilleUnites(&monde, monde.infoJeu.couleurActive);
 				if (monde.infoJeu.couleurActive == IDROUGE) {
 					monde.infoJeu.couleurActive = IDBLEU;
 				}	
@@ -218,47 +241,16 @@ int main () {
 					monde.infoJeu.couleurActive = IDROUGE;
 					monde.infoJeu.tour ++;
 				}
-
 				monde.infoJeu.etatDuJeu = 1;
 			break;
-
+			
 			default: 
 				printf("! Le programme ne devrait pas pouvoir atteindre cet état\n");
 			break;
 		}
-
 	}
-
-
-
-
-	/* DEBUG CODE*/
-	/*
-
-	for (i=0; i<monde.stats[IDHACHE].nombre; i++) {
-		printf("adding a unit\n");
-		uniteTmp = creeUnite(ROUGE, HACHE,4,i, monde.stats[IDHACHE].vie);
-		insereUnite(&monde.infosJoueurs[IDROUGE], uniteTmp);
-		monde.plateau[4][i] = uniteTmp;
-	}
-	afficheMonde(monde);
-
-	afficheListe(monde.infosJoueurs[IDROUGE]);
-	uniteTmp = trouveUnite(monde,4,2);
-	afficheListe(monde.infosJoueurs[IDROUGE]);
-	supprimeUnite(&monde,uniteTmp);
-	afficheListe(monde.infosJoueurs[IDROUGE]);
-	afficheMonde(monde);
-
-	uniteTmp = trouveUnite(monde,4,1);
-	deplaceUnite(&monde,uniteTmp,5,1);
-
-	afficheMonde(monde);
-	lireCommande(&tmpX, &tmpY);
-
-	printf("tmpX : %d, tmpY : %d\n", tmpX, tmpY);
-	creeAccessibilite(&monde, tmpX,tmpY,4);
-	afficheMonde(monde);
-	*/
+	videMonde(&monde);
+	MLV_free_window();
 	return 0;
 }
+
